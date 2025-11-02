@@ -1,73 +1,169 @@
-# Welcome to your Lovable project
+# Yorukaze POS System
 
-## Project info
+## Project Info
 
-**URL**: https://lovable.dev/projects/3a76e584-1cac-4729-b4f4-f9522addaea5
+**Developer**: Yorukaze Production  
+**Copyright**: © Yorukaze Production 2020  
+**Repository**: https://github.com/Milize21/YKZ-POS
 
-## How can I edit this code?
+## About
 
-There are several ways of editing your application.
+Yorukaze POS System is a professional Point of Sale application designed for managing merchandise sales, inventory tracking, and generating comprehensive sales reports. Built specifically for VTuber merchandise management (Afterrain and Yorukaze groups).
 
-**Use Lovable**
+## Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3a76e584-1cac-4729-b4f4-f9522addaea5) and start prompting.
+### 🎯 Core Features
+- **Inventory Management** - Track products, quantities, prices, and stock levels
+- **Sales System** - Process sales with customer ID tracking and transaction grouping
+- **Group Management** - Manage multiple product groups (Afterrain, Yorukaze, Collab Product)
+- **Reports & Analytics** - Comprehensive sales reports with Excel export
+- **User Authentication** - Admin and Cashier role management
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📊 Product Categories
+- Kartu Gacha
+- Standee 15CM & 1:1
+- Ganchi (Keychains)
+- Can Badge
+- Keychain Winter
+- Stickers
+- Lightstick 15 Colors
+- Dakimakura
 
-**Use your preferred IDE**
+### 💾 Data Management
+- LocalStorage-based persistence (no backend required)
+- Excel export for reports (Summary, Sales by Group, Sales by Category, Detailed Transactions)
+- Transaction tracking with unique IDs
+- Customer ID tracking for all sales
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🎨 Design
+- Yorukaze Production branding
+- Navy blue and purple color scheme (#2D3561, #5D6BA3)
+- Wave pattern background design
+- Responsive layout for desktop and mobile
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Technologies Used
 
-Follow these steps:
+- **Frontend**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **UI Framework**: shadcn/ui + Tailwind CSS
+- **Routing**: React Router v6
+- **State Management**: React Hooks
+- **Icons**: Lucide React
+- **Excel Export**: XLSX library
+- **Data Storage**: Browser LocalStorage
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Step 1: Clone the repository
+git clone https://github.com/Milize21/YKZ-POS.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd YKZ-POS
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build for Production
 
-**Use GitHub Codespaces**
+```sh
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The production-ready files will be in the `dist` folder.
 
-## What technologies are used for this project?
+## Default Login Credentials
 
-This project is built with:
+- **Admin**: username: `admin` / password: `12345`
+- **Cashier**: username: `cashier` / password: `12345`
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Project Structure
 
-## How can I deploy this project?
+```
+YKZ-POS/
+├── public/
+│   ├── yorukaze-logo.png      # Main logo
+│   └── wave-pattern.svg        # Background pattern
+├── src/
+│   ├── components/             # Reusable UI components
+│   │   ├── Layout.tsx         # Main layout with header/footer
+│   │   └── ui/                # shadcn/ui components
+│   ├── lib/
+│   │   ├── auth.ts            # Authentication logic
+│   │   ├── inventory.ts       # Inventory management
+│   │   └── sales.ts           # Sales tracking
+│   ├── pages/
+│   │   ├── Dashboard.tsx      # Dashboard overview
+│   │   ├── Inventory.tsx      # Product management
+│   │   ├── Sales.tsx          # Sales processing
+│   │   ├── Groups.tsx         # Group management
+│   │   ├── Reports.tsx        # Sales reports & Excel export
+│   │   └── Login.tsx          # Authentication page
+│   └── App.tsx                # Main application
+├── package.json
+└── README.md
+```
 
-Simply open [Lovable](https://lovable.dev/projects/3a76e584-1cac-4729-b4f4-f9522addaea5) and click on Share -> Publish.
+## Usage
 
-## Can I connect a custom domain to my Lovable project?
+### For Administrators
+- Manage inventory (add, edit, delete products)
+- Create and manage product groups
+- View comprehensive sales reports
+- Export reports to Excel
+- Delete transactions if needed
 
-Yes, you can!
+### For Cashiers
+- Process sales transactions
+- Select products and quantities
+- Enter customer IDs
+- Complete checkout
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Data Persistence
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+⚠️ **Important**: This application uses browser LocalStorage for data persistence.
+
+**Data is saved:**
+- ✅ Automatically after every change
+- ✅ Persists after browser restart
+
+**Data will be lost if:**
+- ❌ Browser cache is cleared
+- ❌ Using different browsers or devices
+- ❌ Using incognito/private mode
+
+**Recommendation**: Regularly export reports to Excel for backup.
+
+## Deployment
+
+This project can be deployed to:
+- Vercel
+- Netlify
+- GitHub Pages
+- Any static hosting service
+
+Simply build the project and deploy the `dist` folder.
+
+## License
+
+Copyright © Yorukaze Production 2020. All rights reserved.
+
+## Support
+
+For issues or questions, please contact Yorukaze Production or open an issue on the GitHub repository.
+
+---
+
+**Made with ❤️ by Yorukaze Production**
