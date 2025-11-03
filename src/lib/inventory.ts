@@ -15,7 +15,7 @@ export const GROUPS = ['All', 'Afterrain', 'Yorukaze', 'Collab Product'];
 export const CATEGORIES = [
   'KARTU GACHA',
   'STANDEE 15CM',
-  'GANCHI',
+  'GANCI',
   'STICKER',
   'LIGHTSTICK 15 COLORS',
   'STANDEE 1:1',
@@ -50,17 +50,17 @@ export const INITIAL_INVENTORY: Product[] = [
   { id: 'st15-9', name: 'Ririna ruu', material: 'Acrylic 15 CM (2 SISI + KAKI)', quantity: 10, price: 130000, sold: 0, category: 'STANDEE 15CM', group: 'Afterrain' },
   { id: 'st15-10', name: 'Vice Seraphyne', material: 'Acrylic 15 CM (2 SISI + KAKI)', quantity: 10, price: 130000, sold: 0, category: 'STANDEE 15CM', group: 'Afterrain' },
   
-  // GANCHI
-  { id: 'gc-1', name: 'Avy Inkaiserin', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-2', name: 'Chelly McBunny', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-3', name: 'Flein Ryst', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-4', name: 'Kana Chizu', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-5', name: 'Lvna Tylthia', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-6', name: 'LynShuu', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-7', name: 'Nezufu Senshirou', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-8', name: 'Poffie Hunni', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-9', name: 'Ririna ruu', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
-  { id: 'gc-10', name: 'Vice Seraphyne', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCHI', group: 'Afterrain' },
+  // GANCI
+  { id: 'gc-1', name: 'Avy Inkaiserin', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-2', name: 'Chelly McBunny', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-3', name: 'Flein Ryst', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-4', name: 'Kana Chizu', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-5', name: 'Lvna Tylthia', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-6', name: 'LynShuu', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-7', name: 'Nezufu Senshirou', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-8', name: 'Poffie Hunni', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-9', name: 'Ririna ruu', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
+  { id: 'gc-10', name: 'Vice Seraphyne', material: 'Ukuran 5 CM (2 SISI)', quantity: 10, price: 40000, sold: 0, category: 'GANCI', group: 'Afterrain' },
   
   // STICKER
   { id: 'stk-1', name: 'Avy Inkaiserin', material: 'Finishing Doff / Lamit / Cutting', quantity: 54, price: 5000, sold: 0, category: 'STICKER', group: 'Afterrain' },
