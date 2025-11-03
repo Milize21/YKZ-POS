@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Minus, Plus, ShoppingCart } from 'lucide-react';
 import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
-import { addSale, formatCurrency } from '@/lib/sales';
+import { addSale, formatCurrency, getSales } from '@/lib/sales';
 import { toast } from 'sonner';
 
 const Sales = () => {
@@ -26,7 +26,9 @@ const Sales = () => {
   const [selectedGroup, setSelectedGroup] = useState<string>(groups[0] || 'All');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [cart, setCart] = useState<Map<string, number>>(new Map());
-  const [customerId, setCustomerId] = useState('');
+  const [customerDate, setCustomerDate] = useState('');
+  const [customerDetails, setCustomerDetails] = useState('');
+  const [customerNumber, setCustomerNumber] = useState('');
 
   useEffect(() => {
     setInventory(getInventory());
@@ -111,8 +113,31 @@ const Sales = () => {
       return;
     }
 
-    if (!customerId.trim()) {
-      toast.error('Please enter Customer ID');
+    // Validate all customer fields
+    if (!customerDate) {
+      toast.error('Please enter customer date');
+      return;
+    }
+
+    if (!customerDetails.trim()) {
+      toast.error('Please enter customer details (e.g., CF20)');
+      return;
+    }
+
+    if (!customerNumber.trim()) {
+      toast.error('Please enter customer number (e.g., 001)');
+      return;
+    }
+
+    // Create full customer ID
+    const fullCustomerId = `${customerDetails.trim()}-${customerNumber.trim()}`;
+
+    // Check if customer ID already exists
+    const existingSales = getSales();
+    const customerExists = existingSales.some(sale => sale.customerId === fullCustomerId);
+    
+    if (customerExists) {
+      toast.error(`Customer ID "${fullCustomerId}" already exists! Please use a different number.`);
       return;
     }
 
@@ -124,7 +149,7 @@ const Sales = () => {
         // Record sale with transaction ID
         addSale({
           transactionId,
-          customerId: customerId.trim(),
+          customerId: fullCustomerId,
           group: product.group,
           category: product.category,
           itemName: product.name,
@@ -144,8 +169,10 @@ const Sales = () => {
     setInventory(updatedInventory);
     saveInventory(updatedInventory);
     setCart(new Map());
-    setCustomerId('');
-    toast.success(`Sale completed! Transaction ID: ${transactionId}`);
+    setCustomerDate('');
+    setCustomerDetails('');
+    setCustomerNumber('');
+    toast.success(`Sale completed! Transaction ID: ${transactionId}\nCustomer ID: ${fullCustomerId}`);
   };
 
   return (
@@ -271,13 +298,41 @@ const Sales = () => {
 
             <div className="pt-4 border-t space-y-4">
               <div>
-                <Label htmlFor="customerId">Customer ID</Label>
+                <Label htmlFor="customerDate">Customer Date *</Label>
                 <Input
-                  id="customerId"
-                  placeholder="e.g. CUST-001"
-                  value={customerId}
-                  onChange={(e) => setCustomerId(e.target.value)}
+                  id="customerDate"
+                  type="date"
+                  value={customerDate}
+                  onChange={(e) => setCustomerDate(e.target.value)}
+                  required
                 />
+              </div>
+              <div>
+                <Label htmlFor="customerDetails">Customer Details *</Label>
+                <Input
+                  id="customerDetails"
+                  placeholder="e.g. CF20"
+                  value={customerDetails}
+                  onChange={(e) => setCustomerDetails(e.target.value.toUpperCase())}
+                  maxLength={10}
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">Example: CF20, AR15, YK22</p>
+              </div>
+              <div>
+                <Label htmlFor="customerNumber">Customer Number *</Label>
+                <Input
+                  id="customerNumber"
+                  placeholder="e.g. 001"
+                  value={customerNumber}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setCustomerNumber(value.padStart(3, '0').slice(-3));
+                  }}
+                  maxLength={3}
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">Will create ID: {customerDetails || 'XX'}-{customerNumber || '000'}</p>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-foreground">Total:</span>
