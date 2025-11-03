@@ -46,25 +46,25 @@ const Login = () => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 50 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 15 }}
+        transition={{ type: "spring" as const, stiffness: 120, damping: 18, mass: 1 }}
       >
-        <Card className="w-full max-w-md p-8 space-y-6 relative z-10 shadow-2xl">
+        <Card className="w-full max-w-md p-8 space-y-6 relative z-10 shadow-2xl backdrop-blur-sm">
           <motion.div 
             className="text-center space-y-2"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+            transition={{ delay: 0.2, type: "spring" as const, stiffness: 120, damping: 18 }}
           >
             <motion.div 
               className="inline-flex items-center justify-center mb-4"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              whileHover={{ scale: 1.15, rotate: 8 }}
+              whileTap={{ scale: 0.9, rotate: -5 }}
+              transition={{ type: "spring" as const, stiffness: 400, damping: 15 }}
             >
               <img 
                 src="/yorukaze-logo.png" 
                 alt="Yorukaze Logo" 
-                className="w-20 h-20 object-contain"
+                className="w-20 h-20 object-contain cursor-pointer"
               />
             </motion.div>
             <motion.h1 
@@ -72,7 +72,7 @@ const Login = () => {
               style={{ color: '#2D3561' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
             >
               Yorukaze POS System
             </motion.h1>
@@ -80,7 +80,7 @@ const Login = () => {
               className="text-muted-foreground"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
             >
               Sign in to continue
             </motion.p>
@@ -91,13 +91,13 @@ const Login = () => {
             className="space-y-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.5, duration: 0.4 }}
           >
             <motion.div 
               className="space-y-2"
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
+              transition={{ delay: 0.6, type: "spring" as const, stiffness: 150, damping: 20 }}
             >
               <Label htmlFor="username">Username</Label>
               <Input
@@ -115,7 +115,7 @@ const Login = () => {
               className="space-y-2"
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.7, type: "spring", stiffness: 100 }}
+              transition={{ delay: 0.7, type: "spring" as const, stiffness: 150, damping: 20 }}
             >
               <Label htmlFor="password">Password</Label>
               <Input
@@ -132,13 +132,13 @@ const Login = () => {
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8, type: "spring", stiffness: 100 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              transition={{ delay: 0.8, type: "spring" as const, stiffness: 150, damping: 20 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
             >
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full shadow-lg" 
                 size="lg"
                 style={{ backgroundColor: '#2D3561' }}
               >
