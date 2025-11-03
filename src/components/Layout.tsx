@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, LayoutDashboard, Package, ShoppingCart, FileText, Users } from 'lucide-react';
 import { getCurrentUser, logout, isAdmin } from '@/lib/auth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LayoutProps {
   children: ReactNode;
@@ -40,14 +41,28 @@ export const Layout = ({ children }: LayoutProps) => {
         />
       </div>
 
-      <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm" style={{ borderBottomColor: '#5D6BA3' }}>
+      <motion.header 
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm" 
+        style={{ borderBottomColor: '#5D6BA3' }}
+      >
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img 
+            <motion.div 
+              className="flex items-center gap-3"
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+            >
+              <motion.img 
                 src="/yorukaze-logo.png" 
                 alt="Yorukaze Logo" 
                 className="h-12 w-12 object-contain"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400 }}
               />
               <div>
                 <h1 className="text-xl font-bold" style={{ color: '#2D3561' }}>Yorukaze POS System</h1>
@@ -55,52 +70,95 @@ export const Layout = ({ children }: LayoutProps) => {
                   {user?.username} ({user?.role})
                 </p>
               </div>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            </motion.div>
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+                className="transition-all hover:scale-105 active:scale-95"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </motion.div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       <div className="container mx-auto px-4 py-6 relative z-10">
-        <nav className="mb-6 flex gap-2 overflow-x-auto pb-2">
-          {navItems.map((item) => (
-            <Button
+        <motion.nav 
+          className="mb-6 flex gap-2 overflow-x-auto pb-2"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
+        >
+          {navItems.map((item, index) => (
+            <motion.div
               key={item.path}
-              variant={location.pathname === item.path ? 'default' : 'outline'}
-              onClick={() => navigate(item.path)}
-              className="flex items-center gap-2 whitespace-nowrap"
-              style={location.pathname === item.path ? { 
-                backgroundColor: '#2D3561',
-                borderColor: '#5D6BA3'
-              } : {}}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + index * 0.1, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Button>
+              <Button
+                variant={location.pathname === item.path ? 'default' : 'outline'}
+                onClick={() => navigate(item.path)}
+                className="flex items-center gap-2 whitespace-nowrap transition-all"
+                style={location.pathname === item.path ? { 
+                  backgroundColor: '#2D3561',
+                  borderColor: '#5D6BA3'
+                } : {}}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            </motion.div>
           ))}
-        </nav>
+        </motion.nav>
 
-        <main className="mb-16">{children}</main>
+        <AnimatePresence mode="wait">
+          <motion.main 
+            key={location.pathname}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            className="mb-16"
+          >
+            {children}
+          </motion.main>
+        </AnimatePresence>
       </div>
 
       {/* Copyright Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t z-40" style={{ borderTopColor: '#5D6BA3' }}>
+      <motion.footer 
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
+        className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t z-40" 
+        style={{ borderTopColor: '#5D6BA3' }}
+      >
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-center gap-2">
-            <img 
+            <motion.img 
               src="/yorukaze-logo.png" 
               alt="Yorukaze" 
               className="h-6 w-6 opacity-70 object-contain"
+              whileHover={{ scale: 1.2, rotate: 360 }}
+              transition={{ type: "spring", stiffness: 200 }}
             />
             <p className="text-xs text-muted-foreground">
               Copyright © Yorukaze Production 2020
             </p>
           </div>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 };

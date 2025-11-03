@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { ShoppingCart } from 'lucide-react';
 import { login } from '@/lib/auth';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -27,81 +27,155 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Wave Pattern Background */}
-      <div className="fixed inset-0 pointer-events-none opacity-5 z-0">
+      <motion.div 
+        className="fixed inset-0 pointer-events-none opacity-5 z-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.05 }}
+        transition={{ duration: 1 }}
+      >
         <img 
           src="/wave-pattern.svg" 
           alt="" 
           className="w-full h-full object-cover"
           style={{ mixBlendMode: 'multiply' }}
         />
-      </div>
+      </motion.div>
 
-      <Card className="w-full max-w-md p-8 space-y-6 relative z-10">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center mb-4">
-            <img 
-              src="/yorukaze-logo.png" 
-              alt="Yorukaze Logo" 
-              className="w-20 h-20 object-contain"
-            />
-          </div>
-          <h1 className="text-3xl font-bold" style={{ color: '#2D3561' }}>Yorukaze POS System</h1>
-          <p className="text-muted-foreground">Sign in to continue</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="admin or cashier"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <Button 
-            type="submit" 
-            className="w-full" 
-            size="lg"
-            style={{ backgroundColor: '#2D3561' }}
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 50 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 15 }}
+      >
+        <Card className="w-full max-w-md p-8 space-y-6 relative z-10 shadow-2xl">
+          <motion.div 
+            className="text-center space-y-2"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
           >
-            Sign In
-          </Button>
-        </form>
+            <motion.div 
+              className="inline-flex items-center justify-center mb-4"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <img 
+                src="/yorukaze-logo.png" 
+                alt="Yorukaze Logo" 
+                className="w-20 h-20 object-contain"
+              />
+            </motion.div>
+            <motion.h1 
+              className="text-3xl font-bold" 
+              style={{ color: '#2D3561' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              Yorukaze POS System
+            </motion.h1>
+            <motion.p 
+              className="text-muted-foreground"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              Sign in to continue
+            </motion.p>
+          </motion.div>
 
-        <div className="text-center text-sm text-muted-foreground">
-          <p>Demo credentials:</p>
-          <p>admin / 12345 or cashier / 12345</p>
-        </div>
+          <motion.form 
+            onSubmit={handleSubmit} 
+            className="space-y-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <motion.div 
+              className="space-y-2"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
+            >
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="admin or cashier"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="transition-all focus:scale-[1.02]"
+              />
+            </motion.div>
 
-        <div className="text-center pt-4 border-t">
-          <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
-            <img 
-              src="/yorukaze-logo.png" 
-              alt="Yorukaze" 
-              className="h-5 w-5 opacity-70 object-contain"
-            />
-            Copyright © Yorukaze Production 2020
-          </p>
-        </div>
-      </Card>
+            <motion.div 
+              className="space-y-2"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.7, type: "spring", stiffness: 100 }}
+            >
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="transition-all focus:scale-[1.02]"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.8, type: "spring", stiffness: 100 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button 
+                type="submit" 
+                className="w-full" 
+                size="lg"
+                style={{ backgroundColor: '#2D3561' }}
+              >
+                Sign In
+              </Button>
+            </motion.div>
+          </motion.form>
+
+          <motion.div 
+            className="text-center text-sm text-muted-foreground"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+          >
+            <p>Demo credentials:</p>
+            <p>admin / 12345 or cashier / 12345</p>
+          </motion.div>
+
+          <motion.div 
+            className="text-center pt-4 border-t"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+          >
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
+              <motion.img 
+                src="/yorukaze-logo.png" 
+                alt="Yorukaze" 
+                className="h-5 w-5 opacity-70 object-contain"
+                whileHover={{ scale: 1.2, rotate: 360 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              />
+              Copyright © Yorukaze Production 2020
+            </p>
+          </motion.div>
+        </Card>
+      </motion.div>
     </div>
   );
 };

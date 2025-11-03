@@ -16,6 +16,7 @@ import { Minus, Plus, ShoppingCart } from 'lucide-react';
 import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
 import { addSale, formatCurrency, getSales } from '@/lib/sales';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Sales = () => {
   const [searchParams] = useSearchParams();
@@ -218,50 +219,81 @@ const Sales = () => {
           </Card>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            {filteredProducts.map((product) => {
-              const inCart = cart.get(product.id) || 0;
-              const available = product.quantity - inCart;
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((product, index) => {
+                const inCart = cart.get(product.id) || 0;
+                const available = product.quantity - inCart;
 
-              return (
-                <Card key={product.id} className="p-4">
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground">{product.material}</p>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-lg font-bold text-foreground">
-                          {formatCurrency(product.price)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Stock: {available}
-                        </p>
+                return (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ 
+                      delay: index * 0.05,
+                      type: "spring", 
+                      stiffness: 100, 
+                      damping: 15 
+                    }}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    layout
+                  >
+                    <Card className="p-4 transition-shadow hover:shadow-lg">
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-foreground">{product.name}</h3>
+                          <p className="text-sm text-muted-foreground">{product.material}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-lg font-bold text-foreground">
+                              {formatCurrency(product.price)}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Stock: {available}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <motion.div whileTap={{ scale: 0.9 }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeFromCart(product.id)}
+                                disabled={inCart === 0}
+                                className="transition-all hover:scale-105"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                            </motion.div>
+                            <motion.span 
+                              className="w-8 text-center font-medium"
+                              key={inCart}
+                              initial={{ scale: 1.5, color: '#2D3561' }}
+                              animate={{ scale: 1, color: 'inherit' }}
+                              transition={{ type: "spring", stiffness: 300 }}
+                            >
+                              {inCart}
+                            </motion.span>
+                            <motion.div whileTap={{ scale: 0.9 }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => addToCart(product.id)}
+                                disabled={available === 0}
+                                className="transition-all hover:scale-105"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </motion.div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeFromCart(product.id)}
-                          disabled={inCart === 0}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="w-8 text-center font-medium">{inCart}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => addToCart(product.id)}
-                          disabled={available === 0}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         </div>
 
