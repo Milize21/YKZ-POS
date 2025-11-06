@@ -15,6 +15,7 @@ import {
 import { Minus, Plus, ShoppingCart } from 'lucide-react';
 import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
 import { addSale, formatCurrency, getSales } from '@/lib/sales';
+import QRReceipt from '@/components/QRReceipt';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -30,6 +31,9 @@ const Sales = () => {
   const [customerDate, setCustomerDate] = useState('');
   const [customerDetails, setCustomerDetails] = useState('');
   const [customerNumber, setCustomerNumber] = useState('');
+  const [showQR, setShowQR] = useState(false);
+  const [qrValue, setQrValue] = useState('');
+  const [qrLabel, setQrLabel] = useState('');
 
   useEffect(() => {
     setInventory(getInventory());
@@ -143,12 +147,13 @@ const Sales = () => {
     }
 
     const transactionId = `TXN-${Date.now()}`;
-    
+    // Collect sale records so we can show a QR for the transaction
+    const saleRecords = [] as any[];
     const updatedInventory = inventory.map(product => {
       const soldQty = cart.get(product.id);
       if (soldQty) {
-        // Record sale with transaction ID
-        addSale({
+        // Record sale with transaction ID and capture return value
+        const newSale = addSale({
           transactionId,
           customerId: fullCustomerId,
           group: product.group,
@@ -157,6 +162,7 @@ const Sales = () => {
           quantitySold: soldQty,
           totalPrice: product.price * soldQty,
         });
+        saleRecords.push(newSale);
 
         return {
           ...product,
@@ -172,7 +178,19 @@ const Sales = () => {
     setCart(new Map());
     setCustomerDate('');
     setCustomerDetails('');
+    const totalAmount = getTotalAmount();
     setCustomerNumber('');
+    // Prepare QR payload (encode transaction info)
+    const payload = JSON.stringify({
+      transactionId,
+      customerId: fullCustomerId,
+      totalAmount,
+      date: new Date().toISOString(),
+      saleIds: saleRecords.map(r => r.id),
+    });
+    setQrValue(payload);
+    setQrLabel(`Transaction ${transactionId} — ${formatCurrency(totalAmount)}`);
+    setShowQR(true);
     toast.success(`Sale completed! Transaction ID: ${transactionId}\nCustomer ID: ${fullCustomerId}`);
   };
 
@@ -437,6 +455,11 @@ const Sales = () => {
             </div>
           </Card>
           </motion.div>
+          {showQR && (
+            <div className="mt-4">
+              <QRReceipt value={qrValue} label={qrLabel} onClose={() => setShowQR(false)} />
+            </div>
+          )}
         </div>
       </div>
     </Layout>
