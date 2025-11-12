@@ -193,7 +193,7 @@ const Reports = () => {
       {/* Minimal Particle Background */}
       <ParticleBackground variant="minimal" />
       
-      <div className="space-y-6 relative z-10">
+      <div className="space-y-6">
         <motion.div 
           className="flex items-center justify-between"
           initial={{ opacity: 0, y: -20 }}

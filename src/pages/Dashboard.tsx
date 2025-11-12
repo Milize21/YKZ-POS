@@ -43,7 +43,7 @@ const Dashboard = () => {
         <MorphShape variant="blob" color="#5D6BA3" size={120} duration={12} />
       </div>
       
-      <div className="space-y-6 relative z-10">
+      <div className="space-y-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
