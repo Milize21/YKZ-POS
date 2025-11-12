@@ -514,13 +514,17 @@ const Sales = () => {
             </div>
           </Card>
           </motion.div>
-          {showQR && (
-            <div className="mt-4">
-              <QRReceipt value={qrValue} label={qrLabel} onClose={() => setShowQR(false)} />
-            </div>
-          )}
         </div>
       </div>
+
+      {/* QRIS Dialog */}
+      <QRReceipt 
+        value={qrValue} 
+        customerName={`${customerDetails}-${customerNumber}`}
+        customerId={qrLabel}
+        isOpen={showQR}
+        onClose={() => setShowQR(false)}
+      />
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
