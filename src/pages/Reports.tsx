@@ -190,8 +190,8 @@ const Reports = () => {
 
   return (
     <Layout>
-      {/* Minimal Particle Background */}
-      <ParticleBackground variant="minimal" />
+      {/* Snow Particle Animation */}
+      <ParticleBackground variant="snow" />
       
       <div className="space-y-6">
         <motion.div 

@@ -19,6 +19,7 @@ import QRReceipt from '@/components/QRReceipt';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MorphShape } from '@/components/MorphShape';
+import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Sales = () => {
   const [searchParams] = useSearchParams();
@@ -197,6 +198,9 @@ const Sales = () => {
 
   return (
     <Layout>
+      {/* Snow Particle Animation */}
+      <ParticleBackground variant="snow" />
+      
       {/* Decorative Wave Shape */}
       <div className="fixed top-1/4 right-0 opacity-5 pointer-events-none z-0">
         <MorphShape variant="wave" color="#2D3561" size={180} duration={15} />

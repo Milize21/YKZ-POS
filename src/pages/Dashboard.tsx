@@ -4,6 +4,7 @@ import { CategoryCard } from '@/components/CategoryCard';
 import { CATEGORIES } from '@/lib/inventory';
 import { motion } from 'framer-motion';
 import { MorphShape } from '@/components/MorphShape';
+import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -35,6 +36,9 @@ const Dashboard = () => {
 
   return (
     <Layout>
+      {/* Snow Particle Animation */}
+      <ParticleBackground variant="snow" />
+      
       {/* Decorative Morphing Shapes */}
       <div className="fixed top-20 right-10 opacity-10 pointer-events-none z-0">
         <MorphShape variant="blob" color="#2D3561" size={150} duration={10} />

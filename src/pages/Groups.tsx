@@ -32,6 +32,7 @@ import {
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { getGroups, saveGroups, getInventory, saveInventory } from '@/lib/inventory';
 import { toast } from 'sonner';
+import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Groups = () => {
   const [groups, setGroups] = useState<string[]>(getGroups());
@@ -143,6 +144,9 @@ const Groups = () => {
 
   return (
     <Layout>
+      {/* Snow Particle Animation */}
+      <ParticleBackground variant="snow" />
+      
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
