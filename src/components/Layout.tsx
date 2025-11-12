@@ -29,57 +29,52 @@ export const Layout = ({ children }: LayoutProps) => {
     ] : []),
   ];
 
-  // Enhanced animation variants
+  // Modern minimal animation variants
   const headerVariants = {
-    hidden: { y: -100, opacity: 0 },
+    hidden: { y: -20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: {
-        type: "spring" as const,
-        stiffness: 80,
-        damping: 20,
-        mass: 1
-      }
-    }
-  };
-
-  const navItemVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.8 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        delay: 0.5 + (i * 0.08),
-        type: "spring" as const,
-        stiffness: 150,
-        damping: 20
-      }
-    })
-  };
-
-  const pageTransitionVariants = {
-    initial: { opacity: 0, x: 30, scale: 0.98 },
-    animate: {
-      opacity: 1,
-      x: 0,
-      scale: 1,
-      transition: {
-        duration: 0.4,
-        ease: [0.25, 0.46, 0.45, 0.94] as const
-      }
-    },
-    exit: {
-      opacity: 0,
-      x: -30,
-      scale: 0.98,
       transition: {
         duration: 0.3,
         ease: [0.25, 0.46, 0.45, 0.94] as const
       }
     }
-  };  return (
+  };
+
+  const navItemVariants = {
+    hidden: { opacity: 0, y: 8 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.1 + (i * 0.03),
+        duration: 0.3,
+        ease: [0.25, 0.46, 0.45, 0.94] as const
+      }
+    })
+  };
+
+  const pageTransitionVariants = {
+    initial: { opacity: 0, y: 8 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: [0.25, 0.46, 0.45, 0.94] as const
+      }
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        duration: 0.15,
+        ease: [0.25, 0.46, 0.45, 0.94] as const
+      }
+    }
+  };
+
+  return (
     <div className="min-h-screen bg-background relative">
       {/* Wave Pattern Background */}
       <div className="fixed inset-0 pointer-events-none opacity-5 z-0">
@@ -102,20 +97,19 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className="flex items-center justify-between">
             <motion.div 
               className="flex items-center gap-3"
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 120, damping: 18 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
             >
               <motion.img 
                 src="/yorukaze-logo.png" 
                 alt="Yorukaze Logo" 
                 className="h-12 w-12 object-contain cursor-pointer"
                 whileHover={{ 
-                  scale: 1.15, 
-                  rotate: 8,
-                  transition: { type: "spring", stiffness: 400, damping: 10 }
+                  scale: 1.05,
+                  transition: { duration: 0.2 }
                 }}
-                whileTap={{ scale: 0.9, rotate: -5 }}
+                whileTap={{ scale: 0.98 }}
               />
               <div>
                 <h1 className="text-xl font-bold" style={{ color: '#2D3561' }}>Yorukaze POS System</h1>
@@ -125,11 +119,11 @@ export const Layout = ({ children }: LayoutProps) => {
               </div>
             </motion.div>
             <motion.div
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 120, damping: 18 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Button 
                 variant="outline" 
@@ -148,9 +142,9 @@ export const Layout = ({ children }: LayoutProps) => {
         <motion.nav 
           className="mb-6 flex gap-2 overflow-x-auto pb-2 pt-2"
           style={{ overflow: 'visible' }}
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4, type: "spring", stiffness: 120, damping: 18 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
         >
           {navItems.map((item, index) => (
             <motion.div
@@ -160,11 +154,10 @@ export const Layout = ({ children }: LayoutProps) => {
               initial="hidden"
               animate="visible"
               whileHover={{ 
-                y: -4, 
-                scale: 1.05,
-                transition: { type: "spring", stiffness: 400, damping: 10 }
+                y: -2, 
+                transition: { duration: 0.2 }
               }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Button
                 variant={location.pathname === item.path ? 'default' : 'outline'}
@@ -198,9 +191,9 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* Copyright Footer */}
       <motion.footer 
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.6, type: "spring", stiffness: 100, damping: 20 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t z-40" 
         style={{ borderTopColor: '#5D6BA3' }}
       >
@@ -211,12 +204,11 @@ export const Layout = ({ children }: LayoutProps) => {
               alt="Yorukaze" 
               className="h-6 w-6 opacity-70 object-contain cursor-pointer"
               whileHover={{ 
-                scale: 1.3, 
-                rotate: 360,
+                scale: 1.1,
                 opacity: 1,
-                transition: { type: "spring", stiffness: 260, damping: 20 }
+                transition: { duration: 0.2 }
               }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.95 }}
             />
             <p className="text-xs text-muted-foreground">
               Copyright © Yorukaze Production 2020
