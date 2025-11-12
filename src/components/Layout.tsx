@@ -146,7 +146,8 @@ export const Layout = ({ children }: LayoutProps) => {
 
       <div className="container mx-auto px-4 py-6 relative z-10">
         <motion.nav 
-          className="mb-6 flex gap-2 overflow-x-auto pb-2"
+          className="mb-6 flex gap-2 overflow-x-auto pb-2 pt-2"
+          style={{ overflow: 'visible' }}
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, type: "spring", stiffness: 120, damping: 18 }}
