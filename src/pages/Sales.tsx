@@ -40,7 +40,7 @@ const Sales = () => {
   const [selectedGroup, setSelectedGroup] = useState<string>(groups[0] || 'All');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [cart, setCart] = useState<Map<string, number>>(new Map());
-  const [customerDate, setCustomerDate] = useState('');
+  const [customerDate, setCustomerDate] = useState(new Date().toISOString().split('T')[0]);
   const [customerDetails, setCustomerDetails] = useState('');
   const [customerNumber, setCustomerNumber] = useState('');
   const [staffName, setStaffName] = useState('');
@@ -202,7 +202,7 @@ const Sales = () => {
     setInventory(updatedInventory);
     saveInventory(updatedInventory);
     setCart(new Map());
-    setCustomerDate('');
+    setCustomerDate(new Date().toISOString().split('T')[0]);
     setCustomerDetails('');
     setCustomerNumber('');
     setStaffName('');
@@ -444,9 +444,11 @@ const Sales = () => {
                   id="customerDate"
                   type="date"
                   value={customerDate}
-                  onChange={(e) => setCustomerDate(e.target.value)}
-                  required
+                  readOnly
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
+                <p className="text-xs text-muted-foreground mt-1">Auto-set to today's date</p>
               </div>
               <div>
                 <Label htmlFor="customerDetails">Customer Details *</Label>
