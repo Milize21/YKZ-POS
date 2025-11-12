@@ -1,4 +1,6 @@
 // Inventory types and data
+import { getCollection, updateCollection, getDatabase } from './database';
+
 export interface Product {
   id: string;
   name: string;
@@ -31,21 +33,19 @@ export const CATEGORIES = [
 ];
 
 export const getGroups = (): string[] => {
-  const stored = localStorage.getItem('groups');
-  return stored ? JSON.parse(stored) : GROUPS;
+  return getCollection('groups');
 };
 
 export const saveGroups = (groups: string[]) => {
-  localStorage.setItem('groups', JSON.stringify(groups));
+  updateCollection('groups', groups);
 };
 
 export const getCategories = (): string[] => {
-  const stored = localStorage.getItem('categories');
-  return stored ? JSON.parse(stored) : CATEGORIES;
+  return getCollection('categories');
 };
 
 export const saveCategories = (categories: string[]) => {
-  localStorage.setItem('categories', JSON.stringify(categories));
+  updateCollection('categories', categories);
 };
 
 export const addCategory = (category: string): string[] => {
@@ -142,28 +142,32 @@ export const INITIAL_INVENTORY: Product[] = [
   { id: 'daki-1', name: 'Hessa Dakimakura', material: '180 Cm x 60 Cm', quantity: 3, price: 329000, sold: 0, category: 'DAKIMAKURA', group: 'Yorukaze' },
 ];
 
-// Initialize inventory from localStorage
+// Initialize inventory from database
 export const getInventory = (): Product[] => {
-  const stored = localStorage.getItem('inventory');
-  if (stored) {
-    const inventory = JSON.parse(stored);
-    // Fix any products with undefined or negative sold values
-    const fixed = inventory.map((p: Product) => ({
-      ...p,
-      sold: typeof p.sold === 'number' && p.sold >= 0 ? p.sold : 0
-    }));
-    // Save fixed data back if any corrections were made
-    if (JSON.stringify(inventory) !== JSON.stringify(fixed)) {
-      localStorage.setItem('inventory', JSON.stringify(fixed));
-    }
-    return fixed;
+  const inventory = getCollection('inventory');
+  
+  // If empty, initialize with default data
+  if (inventory.length === 0) {
+    updateCollection('inventory', INITIAL_INVENTORY);
+    return INITIAL_INVENTORY;
   }
-  localStorage.setItem('inventory', JSON.stringify(INITIAL_INVENTORY));
-  return INITIAL_INVENTORY;
+  
+  // Fix any products with undefined or negative sold values
+  const fixed = inventory.map((p: Product) => ({
+    ...p,
+    sold: typeof p.sold === 'number' && p.sold >= 0 ? p.sold : 0
+  }));
+  
+  // Save fixed data back if any corrections were made
+  if (JSON.stringify(inventory) !== JSON.stringify(fixed)) {
+    updateCollection('inventory', fixed);
+  }
+  
+  return fixed;
 };
 
 export const saveInventory = (inventory: Product[]) => {
-  localStorage.setItem('inventory', JSON.stringify(inventory));
+  updateCollection('inventory', inventory);
 };
 
 export const getProductsByCategory = (category: string): Product[] => {
@@ -172,12 +176,11 @@ export const getProductsByCategory = (category: string): Product[] => {
 
 // Trash bin functions
 export const getTrash = (): TrashItem[] => {
-  const stored = localStorage.getItem('inventoryTrash');
-  return stored ? JSON.parse(stored) : [];
+  return getCollection('inventoryTrash');
 };
 
 export const saveTrash = (trash: TrashItem[]) => {
-  localStorage.setItem('inventoryTrash', JSON.stringify(trash));
+  updateCollection('inventoryTrash', trash);
 };
 
 export const moveToTrash = (product: Product): TrashItem[] => {

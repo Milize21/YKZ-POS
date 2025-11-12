@@ -10,6 +10,7 @@ import Sales from "./pages/Sales";
 import Groups from "./pages/Groups";
 import Reports from "./pages/Reports";
 import Trash from "./pages/Trash";
+import DatabaseSettings from "./pages/DatabaseSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/groups" element={<Groups />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/trash" element={<Trash />} />
+          <Route path="/database" element={<DatabaseSettings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

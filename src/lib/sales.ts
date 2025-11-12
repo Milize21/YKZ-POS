@@ -1,4 +1,6 @@
 // Sales tracking
+import { getCollection, updateCollection } from './database';
+
 export interface Sale {
   id: string;
   transactionId: string;
@@ -13,8 +15,7 @@ export interface Sale {
 }
 
 export const getSales = (): Sale[] => {
-  const stored = localStorage.getItem('sales');
-  return stored ? JSON.parse(stored) : [];
+  return getCollection('sales');
 };
 
 export const addSale = (sale: Omit<Sale, 'id' | 'date'>): Sale => {
@@ -25,7 +26,7 @@ export const addSale = (sale: Omit<Sale, 'id' | 'date'>): Sale => {
     date: new Date().toISOString(),
   };
   sales.push(newSale);
-  localStorage.setItem('sales', JSON.stringify(sales));
+  updateCollection('sales', sales);
   return newSale;
 };
 
@@ -33,7 +34,7 @@ export const deleteSalesByTransaction = (transactionId: string): Sale[] => {
   const sales = getSales();
   const deletedSales = sales.filter(s => s.transactionId === transactionId);
   const updated = sales.filter(s => s.transactionId !== transactionId);
-  localStorage.setItem('sales', JSON.stringify(updated));
+  updateCollection('sales', updated);
   return deletedSales;
 };
 

@@ -1,4 +1,6 @@
 // Temporary auth context - will be replaced with Lovable Cloud auth
+import { getDatabase, saveDatabase } from './database';
+
 export type UserRole = 'admin' | 'cashier';
 
 export interface User {
@@ -19,7 +21,9 @@ export const login = (username: string, password: string): User | null => {
   
   if (user) {
     const userData = { username: user.username, role: user.role };
-    localStorage.setItem('user', JSON.stringify(userData));
+    const db = getDatabase();
+    db.auth = userData;
+    saveDatabase(db);
     return userData;
   }
   
@@ -27,12 +31,14 @@ export const login = (username: string, password: string): User | null => {
 };
 
 export const logout = () => {
-  localStorage.removeItem('user');
+  const db = getDatabase();
+  db.auth = null;
+  saveDatabase(db);
 };
 
 export const getCurrentUser = (): User | null => {
-  const userStr = localStorage.getItem('user');
-  return userStr ? JSON.parse(userStr) : null;
+  const db = getDatabase();
+  return db.auth;
 };
 
 export const isAdmin = (user: User | null): boolean => {
