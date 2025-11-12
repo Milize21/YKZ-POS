@@ -17,26 +17,31 @@ export const ParticleBackground = ({ variant = 'subtle' }: ParticleBackgroundPro
       case 'snow':
         return {
           particles: {
-            number: { value: 30, density: { enable: true, value_area: 800 } },
-            color: { value: "#ffffff" },
+            number: { value: 50, density: { enable: true, value_area: 800 } },
+            color: { value: ["#60A5FA", "#93C5FD", "#DBEAFE"] }, // Blue shades for contrast
             opacity: {
-              value: 0.3,
+              value: 0.6,
               random: true,
-              anim: { enable: true, speed: 0.5, opacity_min: 0.1, sync: false }
+              anim: { enable: true, speed: 0.5, opacity_min: 0.2, sync: false }
             },
             size: {
-              value: 3,
+              value: 4,
               random: true,
-              anim: { enable: false }
+              anim: { enable: true, speed: 2, size_min: 1, sync: false }
             },
             move: {
               enable: true,
-              speed: 1,
+              speed: 2,
               direction: "bottom" as const,
               random: true,
               straight: false,
               out_mode: "out" as const,
               bounce: false,
+            },
+            wobble: {
+              enable: true,
+              distance: 10,
+              speed: 10
             }
           },
           interactivity: {

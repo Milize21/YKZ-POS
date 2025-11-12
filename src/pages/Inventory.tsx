@@ -31,6 +31,7 @@ import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/l
 import { formatCurrency } from '@/lib/sales';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Inventory = () => {
   const [inventory, setInventory] = useState<Product[]>(getInventory());
@@ -177,7 +178,10 @@ const Inventory = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      {/* Snow Particle Effect with Blue Shades */}
+      <ParticleBackground variant="snow" />
+      
+      <div className="space-y-6 relative z-10">
         <motion.div 
           className="flex items-center justify-between"
           initial={{ opacity: 0, y: -20 }}
