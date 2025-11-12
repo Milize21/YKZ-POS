@@ -26,19 +26,12 @@ const QRReceipt: React.FC<QRReceiptProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[600px] p-0 bg-white overflow-hidden border-0">
         <div className="relative w-full">
-          {/* Background QRIS Template Image */}
+          {/* QRIS Template Image */}
           <img 
             src="/Qris2YKZ.png" 
             alt="QRIS Template" 
             className="w-full h-auto"
           />
-          
-          {/* Overlay Dynamic QR Code on top of the template */}
-          <div className="absolute top-[30%] left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="bg-white p-2">
-              <QRCode value={value} size={280} level="H" />
-            </div>
-          </div>
 
           {/* Close button */}
           <Button
