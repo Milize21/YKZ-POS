@@ -17,17 +17,33 @@ export const ParticleBackground = ({ variant = 'subtle' }: ParticleBackgroundPro
       case 'snow':
         return {
           particles: {
-            number: { value: 50, density: { enable: true, value_area: 800 } },
-            color: { value: ["#60A5FA", "#93C5FD", "#DBEAFE"] }, // Blue shades for contrast
+            number: { 
+              value: 50, 
+              density: { 
+                enable: true, 
+                area: 800 
+              } 
+            },
+            color: { value: ["#60A5FA", "#93C5FD", "#DBEAFE"] },
             opacity: {
               value: 0.6,
               random: true,
-              anim: { enable: true, speed: 0.5, opacity_min: 0.2, sync: false }
+              animation: { 
+                enable: true, 
+                speed: 0.5, 
+                minimumValue: 0.2, 
+                sync: false 
+              }
             },
             size: {
               value: 4,
               random: true,
-              anim: { enable: true, speed: 2, size_min: 1, sync: false }
+              animation: { 
+                enable: true, 
+                speed: 2, 
+                minimumValue: 1, 
+                sync: false 
+              }
             },
             move: {
               enable: true,
@@ -35,35 +51,41 @@ export const ParticleBackground = ({ variant = 'subtle' }: ParticleBackgroundPro
               direction: "bottom" as const,
               random: true,
               straight: false,
-              out_mode: "out" as const,
+              outModes: "out" as const,
               bounce: false,
-            },
-            wobble: {
-              enable: true,
-              distance: 10,
-              speed: 10
             }
           },
           interactivity: {
-            detect_on: "canvas" as const,
+            detectsOn: "window" as const,
             events: {
-              onhover: { enable: false },
-              onclick: { enable: false },
+              onHover: { enable: false },
+              onClick: { enable: false },
               resize: true
             }
           },
-          retina_detect: true
+          detectRetina: true
         };
 
       case 'minimal':
         return {
           particles: {
-            number: { value: 20, density: { enable: true, value_area: 1000 } },
+            number: { 
+              value: 20, 
+              density: { 
+                enable: true, 
+                area: 1000 
+              } 
+            },
             color: { value: "#5D6BA3" },
             opacity: {
               value: 0.15,
               random: true,
-              anim: { enable: true, speed: 0.3, opacity_min: 0.05, sync: false }
+              animation: { 
+                enable: true, 
+                speed: 0.3, 
+                minimumValue: 0.05, 
+                sync: false 
+              }
             },
             size: {
               value: 2,
@@ -75,29 +97,40 @@ export const ParticleBackground = ({ variant = 'subtle' }: ParticleBackgroundPro
               direction: "none" as const,
               random: true,
               straight: false,
-              out_mode: "bounce" as const,
+              outModes: "bounce" as const,
             }
           },
           interactivity: {
-            detect_on: "canvas" as const,
+            detectsOn: "window" as const,
             events: {
-              onhover: { enable: false },
-              onclick: { enable: false },
+              onHover: { enable: false },
+              onClick: { enable: false },
               resize: true
             }
           },
-          retina_detect: true
+          detectRetina: true
         };
 
       default: // subtle
         return {
           particles: {
-            number: { value: 15, density: { enable: true, value_area: 1200 } },
+            number: { 
+              value: 15, 
+              density: { 
+                enable: true, 
+                area: 1200 
+              } 
+            },
             color: { value: "#2D3561" },
             opacity: {
               value: 0.1,
               random: true,
-              anim: { enable: true, speed: 0.2, opacity_min: 0.03, sync: false }
+              animation: { 
+                enable: true, 
+                speed: 0.2, 
+                minimumValue: 0.03, 
+                sync: false 
+              }
             },
             size: {
               value: 1.5,
@@ -109,18 +142,18 @@ export const ParticleBackground = ({ variant = 'subtle' }: ParticleBackgroundPro
               direction: "none" as const,
               random: true,
               straight: false,
-              out_mode: "bounce" as const,
+              outModes: "bounce" as const,
             }
           },
           interactivity: {
-            detect_on: "canvas" as const,
+            detectsOn: "window" as const,
             events: {
-              onhover: { enable: false },
-              onclick: { enable: false },
+              onHover: { enable: false },
+              onClick: { enable: false },
               resize: true
             }
           },
-          retina_detect: true
+          detectRetina: true
         };
     }
   };
