@@ -300,13 +300,14 @@ const Sales = () => {
                     layout
                   >
                     <Card className="p-4 transition-shadow hover:shadow-lg overflow-hidden">
-                      <div className="space-y-3">
+                      <div className="flex gap-4">
+                        {/* Image on the left */}
                         {product.image && (
                           <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.04 + 0.05 }}
-                            className="w-full h-32 overflow-hidden rounded-lg"
+                            className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg"
                           >
                             <img 
                               src={product.image} 
@@ -315,24 +316,27 @@ const Sales = () => {
                             />
                           </motion.div>
                         )}
-                        <motion.div
-                          initial={{ x: -10, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          transition={{ delay: index * 0.04 + 0.1 }}
-                        >
-                          <h3 className="font-semibold text-foreground">{product.name}</h3>
-                          <p className="text-sm text-muted-foreground">{product.material}</p>
-                        </motion.div>
-                        <div className="flex justify-between items-center">
-                          <div>
+                        
+                        {/* Product details on the right */}
+                        <div className="flex-1 flex flex-col justify-between min-w-0">
+                          <motion.div
+                            initial={{ x: -10, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: index * 0.04 + 0.1 }}
+                            className="space-y-1"
+                          >
+                            <h3 className="font-semibold text-foreground truncate">{product.name}</h3>
+                            <p className="text-sm text-muted-foreground truncate">{product.material}</p>
                             <p className="text-lg font-bold text-foreground">
                               {formatCurrency(product.price)}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               Stock: {available}
                             </p>
-                          </div>
-                          <div className="flex items-center gap-2">
+                          </motion.div>
+                          
+                          {/* Buttons at the bottom */}
+                          <div className="flex items-center gap-2 mt-2">
                             <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
                               <Button
                                 variant="outline"
