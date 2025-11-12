@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,20 +54,23 @@ const Inventory = () => {
     image: '',
   });
 
-  // Refresh groups and categories from localStorage periodically
+  // Refresh groups and categories from localStorage periodically (optimized)
   useEffect(() => {
     const interval = setInterval(() => {
       const updatedGroups = getGroups();
       const updatedCategories = getCategories();
+      
+      // Only update if there are actual changes
       if (JSON.stringify(updatedGroups) !== JSON.stringify(groups)) {
         setGroups(updatedGroups);
       }
       if (JSON.stringify(updatedCategories) !== JSON.stringify(categories)) {
         setCategories(updatedCategories);
       }
-    }, 1000);
+    }, 5000); // Increased to 5 seconds to reduce lag
+    
     return () => clearInterval(interval);
-  }, [groups, categories]);
+  }, []); // Empty dependency array to prevent excessive re-renders
 
   const filteredProducts = inventory.filter(p => {
     const matchesCategory = p.category === selectedCategory;
@@ -75,21 +78,23 @@ const Inventory = () => {
     return matchesCategory && matchesGroup;
   });
 
-  // Get only categories that have products for the selected group
-  const availableCategories = categories.filter(category => {
-    return inventory.some(p => {
-      const matchesCategory = p.category === category;
-      const matchesGroup = selectedGroup === 'All' || p.group === selectedGroup;
-      return matchesCategory && matchesGroup;
+  // Get only categories that have products for the selected group (memoized)
+  const availableCategories = useMemo(() => {
+    return categories.filter(category => {
+      return inventory.some(p => {
+        const matchesCategory = p.category === category;
+        const matchesGroup = selectedGroup === 'All' || p.group === selectedGroup;
+        return matchesCategory && matchesGroup;
+      });
     });
-  });
+  }, [categories, inventory, selectedGroup]);
 
   // If selected category has no products, switch to first available category
   useEffect(() => {
     if (availableCategories.length > 0 && !availableCategories.includes(selectedCategory)) {
       setSelectedCategory(availableCategories[0]);
     }
-  }, [selectedGroup, availableCategories, selectedCategory]);
+  }, [selectedGroup]); // Only run when group changes
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,11 +112,44 @@ const Inventory = () => {
       return;
     }
 
+    // Show loading state
+    toast.info('Processing image...');
+    
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      setImagePreview(base64String);
-      setFormData({ ...formData, image: base64String });
+      
+      // Compress large images
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Resize if image is too large (max 800px width/height)
+        const maxSize = 800;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = (height / width) * maxSize;
+            width = maxSize;
+          } else {
+            width = (width / height) * maxSize;
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with compression
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        setImagePreview(compressedBase64);
+        setFormData({ ...formData, image: compressedBase64 });
+        toast.success('Image uploaded successfully');
+      };
+      img.src = base64String;
     };
     reader.readAsDataURL(file);
   };
@@ -123,6 +161,9 @@ const Inventory = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Disable multiple rapid submissions
+    if (isDialogOpen === false) return;
     
     if (editingProduct) {
       const updated = inventory.map(p =>
