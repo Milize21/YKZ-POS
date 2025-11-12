@@ -27,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, Upload, X, Package } from 'lucide-react';
-import { getInventory, saveInventory, getCategories, addCategory, Product, getGroups } from '@/lib/inventory';
+import { getInventory, saveInventory, getCategories, addCategory, Product, getGroups, moveToTrash } from '@/lib/inventory';
 import { formatCurrency } from '@/lib/sales';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -163,10 +163,14 @@ const Inventory = () => {
   };
 
   const handleDelete = (id: string) => {
-    const updated = inventory.filter(p => p.id !== id);
-    setInventory(updated);
-    saveInventory(updated);
-    toast.success('Product deleted');
+    const product = inventory.find(p => p.id === id);
+    if (product) {
+      moveToTrash(product);
+      const updated = inventory.filter(p => p.id !== id);
+      setInventory(updated);
+      saveInventory(updated);
+      toast.success('Product moved to trash');
+    }
   };
 
   const resetForm = () => {

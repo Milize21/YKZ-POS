@@ -9,6 +9,11 @@ export interface Product {
   category: string;
   group: string;
   image?: string; // Base64 encoded image or URL
+  deletedAt?: string; // ISO date string when item was deleted
+}
+
+export interface TrashItem extends Product {
+  deletedAt: string;
 }
 
 export const GROUPS = ['All', 'Afterrain', 'Yorukaze', 'Collab Product'];
@@ -153,4 +158,52 @@ export const saveInventory = (inventory: Product[]) => {
 
 export const getProductsByCategory = (category: string): Product[] => {
   return getInventory().filter(p => p.category === category);
+};
+
+// Trash bin functions
+export const getTrash = (): TrashItem[] => {
+  const stored = localStorage.getItem('inventoryTrash');
+  return stored ? JSON.parse(stored) : [];
+};
+
+export const saveTrash = (trash: TrashItem[]) => {
+  localStorage.setItem('inventoryTrash', JSON.stringify(trash));
+};
+
+export const moveToTrash = (product: Product): TrashItem[] => {
+  const trash = getTrash();
+  const trashedItem: TrashItem = {
+    ...product,
+    deletedAt: new Date().toISOString(),
+  };
+  trash.push(trashedItem);
+  saveTrash(trash);
+  return trash;
+};
+
+export const restoreFromTrash = (productId: string): { product: Product | null; trash: TrashItem[] } => {
+  const trash = getTrash();
+  const itemIndex = trash.findIndex(item => item.id === productId);
+  
+  if (itemIndex === -1) {
+    return { product: null, trash };
+  }
+  
+  const [restoredItem] = trash.splice(itemIndex, 1);
+  saveTrash(trash);
+  
+  // Remove deletedAt property when restoring
+  const { deletedAt, ...product } = restoredItem;
+  return { product, trash };
+};
+
+export const permanentlyDelete = (productId: string): TrashItem[] => {
+  const trash = getTrash();
+  const updated = trash.filter(item => item.id !== productId);
+  saveTrash(updated);
+  return updated;
+};
+
+export const emptyTrash = (): void => {
+  saveTrash([]);
 };
