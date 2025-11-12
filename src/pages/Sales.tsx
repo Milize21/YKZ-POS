@@ -307,12 +307,12 @@ const Sales = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.04 + 0.05 }}
-                            className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg"
+                            className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 flex items-center justify-center p-2"
                           >
                             <img 
                               src={product.image} 
                               alt={product.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                             />
                           </motion.div>
                         )}
