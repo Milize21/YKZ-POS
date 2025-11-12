@@ -126,7 +126,11 @@ const Inventory = () => {
     
     if (editingProduct) {
       const updated = inventory.map(p =>
-        p.id === editingProduct.id ? { ...p, ...formData } : p
+        p.id === editingProduct.id ? { 
+          ...p, 
+          ...formData,
+          sold: p.sold // Preserve sold count
+        } : p
       );
       setInventory(updated);
       saveInventory(updated);

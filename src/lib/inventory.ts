@@ -146,7 +146,17 @@ export const INITIAL_INVENTORY: Product[] = [
 export const getInventory = (): Product[] => {
   const stored = localStorage.getItem('inventory');
   if (stored) {
-    return JSON.parse(stored);
+    const inventory = JSON.parse(stored);
+    // Fix any products with undefined or negative sold values
+    const fixed = inventory.map((p: Product) => ({
+      ...p,
+      sold: typeof p.sold === 'number' && p.sold >= 0 ? p.sold : 0
+    }));
+    // Save fixed data back if any corrections were made
+    if (JSON.stringify(inventory) !== JSON.stringify(fixed)) {
+      localStorage.setItem('inventory', JSON.stringify(fixed));
+    }
+    return fixed;
   }
   localStorage.setItem('inventory', JSON.stringify(INITIAL_INVENTORY));
   return INITIAL_INVENTORY;
