@@ -475,7 +475,7 @@ const Inventory = () => {
                           <img 
                             src={product.image} 
                             alt={product.name}
-                            className="w-12 h-12 object-cover rounded border"
+                            className="w-12 h-12 object-contain rounded border bg-gray-50 p-1"
                           />
                         ) : (
                           <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
