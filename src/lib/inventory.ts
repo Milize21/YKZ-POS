@@ -34,6 +34,24 @@ export const saveGroups = (groups: string[]) => {
   localStorage.setItem('groups', JSON.stringify(groups));
 };
 
+export const getCategories = (): string[] => {
+  const stored = localStorage.getItem('categories');
+  return stored ? JSON.parse(stored) : CATEGORIES;
+};
+
+export const saveCategories = (categories: string[]) => {
+  localStorage.setItem('categories', JSON.stringify(categories));
+};
+
+export const addCategory = (category: string): string[] => {
+  const categories = getCategories();
+  if (!categories.includes(category)) {
+    categories.push(category);
+    saveCategories(categories);
+  }
+  return categories;
+};
+
 // Initial inventory data
 export const INITIAL_INVENTORY: Product[] = [
   // KARTU GACHA

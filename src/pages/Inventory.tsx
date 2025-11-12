@@ -27,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, Upload, X, Package } from 'lucide-react';
-import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
+import { getInventory, saveInventory, getCategories, addCategory, Product, getGroups } from '@/lib/inventory';
 import { formatCurrency } from '@/lib/sales';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,31 +36,38 @@ import { ParticleBackground } from '@/components/ParticleBackground';
 const Inventory = () => {
   const [inventory, setInventory] = useState<Product[]>(getInventory());
   const [groups, setGroups] = useState<string[]>(getGroups());
-  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORIES[0]);
+  const [categories, setCategories] = useState<string[]>(getCategories());
+  const [selectedCategory, setSelectedCategory] = useState<string>(getCategories()[0]);
   const [selectedGroup, setSelectedGroup] = useState<string>('All');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [newCategory, setNewCategory] = useState('');
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     material: '',
     quantity: 0,
     price: 0,
-    category: CATEGORIES[0],
+    category: getCategories()[0],
     group: groups.find(g => g !== 'All') || 'Afterrain',
     image: '',
   });
 
-  // Refresh groups from localStorage periodically
+  // Refresh groups and categories from localStorage periodically
   useEffect(() => {
     const interval = setInterval(() => {
       const updatedGroups = getGroups();
+      const updatedCategories = getCategories();
       if (JSON.stringify(updatedGroups) !== JSON.stringify(groups)) {
         setGroups(updatedGroups);
       }
+      if (JSON.stringify(updatedCategories) !== JSON.stringify(categories)) {
+        setCategories(updatedCategories);
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [groups]);
+  }, [groups, categories]);
 
   const filteredProducts = inventory.filter(p => {
     const matchesCategory = p.category === selectedCategory;
@@ -69,7 +76,7 @@ const Inventory = () => {
   });
 
   // Get only categories that have products for the selected group
-  const availableCategories = CATEGORIES.filter(category => {
+  const availableCategories = categories.filter(category => {
     return inventory.some(p => {
       const matchesCategory = p.category === category;
       const matchesGroup = selectedGroup === 'All' || p.group === selectedGroup;
@@ -170,10 +177,23 @@ const Inventory = () => {
       material: '',
       quantity: 0,
       price: 0,
-      category: CATEGORIES[0],
+      category: categories[0],
       group: groups.find(g => g !== 'All') || 'Afterrain',
       image: '',
     });
+  };
+
+  const handleAddCategory = () => {
+    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
+      const updatedCategories = addCategory(newCategory.trim());
+      setCategories(updatedCategories);
+      setFormData({ ...formData, category: newCategory.trim() });
+      toast.success(`Category "${newCategory.trim()}" added successfully`);
+      setNewCategory('');
+      setIsAddingCategory(false);
+    } else if (categories.includes(newCategory.trim())) {
+      toast.error('Category already exists');
+    }
   };
 
   return (
@@ -272,19 +292,64 @@ const Inventory = () => {
                 </div>
                 <div>
                   <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {!isAddingCategory ? (
+                    <div className="flex gap-2">
+                      <Select
+                        value={formData.category}
+                        onValueChange={(value) => setFormData({ ...formData, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddingCategory(true)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter new category name"
+                        value={newCategory}
+                        onChange={(e) => setNewCategory(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCategory();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAddCategory}
+                      >
+                        Add
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsAddingCategory(false);
+                          setNewCategory('');
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="name">Product Name</Label>
