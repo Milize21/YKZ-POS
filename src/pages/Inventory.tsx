@@ -30,6 +30,7 @@ import { Plus, Pencil, Trash2, Upload, X, Package } from 'lucide-react';
 import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
 import { formatCurrency } from '@/lib/sales';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Inventory = () => {
   const [inventory, setInventory] = useState<Product[]>(getInventory());
@@ -177,7 +178,12 @@ const Inventory = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <motion.div 
+          className="flex items-center justify-between"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">Inventory Management</h2>
             <p className="text-muted-foreground">Manage your products and stock</p>
@@ -187,17 +193,26 @@ const Inventory = () => {
             if (!open) resetForm();
           }}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Product
+                </Button>
+              </motion.div>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
                   <Label htmlFor="image">Product Image</Label>
                   <div className="mt-2">
                     {imagePreview ? (
@@ -234,7 +249,7 @@ const Inventory = () => {
                     )}
                     <p className="text-xs text-muted-foreground mt-2">Max size: 2MB</p>
                   </div>
-                </div>
+                </motion.div>
                 <div>
                   <Label htmlFor="group">Group</Label>
                   <Select
@@ -312,7 +327,7 @@ const Inventory = () => {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+        </motion.div>
 
         <div className="flex gap-4">
           <Card className="p-4 flex-1">
@@ -363,47 +378,76 @@ const Inventory = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    {product.image ? (
-                      <img 
-                        src={product.image} 
-                        alt={product.name}
-                        className="w-12 h-12 object-cover rounded border"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
-                        <Package className="h-6 w-6 text-gray-400" />
+              <AnimatePresence mode="popLayout">
+                {filteredProducts.map((product, index) => (
+                  <motion.tr
+                    key={product.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{
+                      type: "spring" as const,
+                      stiffness: 300,
+                      damping: 30,
+                      delay: index * 0.03,
+                    }}
+                    className="border-b transition-colors hover:bg-muted/50"
+                  >
+                    <TableCell>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring" as const, stiffness: 400, damping: 20 }}
+                      >
+                        {product.image ? (
+                          <img 
+                            src={product.image} 
+                            alt={product.name}
+                            className="w-12 h-12 object-cover rounded border"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
+                            <Package className="h-6 w-6 text-gray-400" />
+                          </div>
+                        )}
+                      </motion.div>
+                    </TableCell>
+                    <TableCell className="font-medium">{product.group}</TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.material}</TableCell>
+                    <TableCell className="text-right">{product.quantity}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(product.price)}</TableCell>
+                    <TableCell className="text-right text-success">{product.sold}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(product)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </motion.div>
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: -5 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(product.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </motion.div>
                       </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{product.group}</TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.material}</TableCell>
-                  <TableCell className="text-right">{product.quantity}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(product.price)}</TableCell>
-                  <TableCell className="text-right text-success">{product.sold}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(product.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
             </TableBody>
           </Table>
         </Card>

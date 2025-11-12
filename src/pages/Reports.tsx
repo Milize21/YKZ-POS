@@ -24,6 +24,7 @@ import { getGroups, getInventory, saveInventory } from '@/lib/inventory';
 import { DollarSign, Package, TrendingUp, Trash2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Reports = () => {
   const [startDate, setStartDate] = useState('');
@@ -189,22 +190,37 @@ const Reports = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <motion.div 
+          className="flex items-center justify-between"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">Sales Reports</h2>
             <p className="text-muted-foreground">View your sales analytics</p>
           </div>
-          <Button 
-            onClick={exportToExcel}
-            style={{ backgroundColor: '#2D3561' }}
-            size="lg"
+          <motion.div
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Download className="h-4 w-4 mr-2" />
-            Export to Excel
-          </Button>
-        </div>
+            <Button 
+              onClick={exportToExcel}
+              style={{ backgroundColor: '#2D3561' }}
+              size="lg"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export to Excel
+            </Button>
+          </motion.div>
+        </motion.div>
 
-        <Card className="p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+        >
+          <Card className="p-6">
           <div className="grid md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="startDate">Start Date</Label>
@@ -249,9 +265,21 @@ const Reports = () => {
             </div>
           </div>
         </Card>
+        </motion.div>
 
-        <div className="grid sm:grid-cols-3 gap-4">
-          <Card className="p-6">
+        <motion.div 
+          className="grid sm:grid-cols-3 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, staggerChildren: 0.1 }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring" as const, stiffness: 300, damping: 24, delay: 0.25 }}
+            whileHover={{ scale: 1.03, y: -4 }}
+          >
+            <Card className="p-6 transition-shadow hover:shadow-lg">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-success/10 rounded-lg">
                 <DollarSign className="h-6 w-6 text-success" />
@@ -264,8 +292,15 @@ const Reports = () => {
               </div>
             </div>
           </Card>
+          </motion.div>
 
-          <Card className="p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring" as const, stiffness: 300, damping: 24, delay: 0.35 }}
+            whileHover={{ scale: 1.03, y: -4 }}
+          >
+            <Card className="p-6 transition-shadow hover:shadow-lg">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-primary/10 rounded-lg">
                 <Package className="h-6 w-6 text-primary" />
@@ -276,8 +311,15 @@ const Reports = () => {
               </div>
             </div>
           </Card>
+          </motion.div>
 
-          <Card className="p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring" as const, stiffness: 300, damping: 24, delay: 0.45 }}
+            whileHover={{ scale: 1.03, y: -4 }}
+          >
+            <Card className="p-6 transition-shadow hover:shadow-lg">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-accent/10 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-accent" />
@@ -290,7 +332,8 @@ const Reports = () => {
               </div>
             </div>
           </Card>
-        </div>
+          </motion.div>
+        </motion.div>
 
         <Card className="p-6">
           <h3 className="text-xl font-bold text-foreground mb-4">Sales by Group</h3>
