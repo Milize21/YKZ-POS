@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, X, Package } from 'lucide-react';
 import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
 import { formatCurrency } from '@/lib/sales';
 import { toast } from 'sonner';
@@ -38,6 +38,7 @@ const Inventory = () => {
   const [selectedGroup, setSelectedGroup] = useState<string>('All');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     material: '',
@@ -45,6 +46,7 @@ const Inventory = () => {
     price: 0,
     category: CATEGORIES[0],
     group: groups.find(g => g !== 'All') || 'Afterrain',
+    image: '',
   });
 
   // Refresh groups from localStorage periodically
@@ -79,6 +81,36 @@ const Inventory = () => {
       setSelectedCategory(availableCategories[0]);
     }
   }, [selectedGroup, availableCategories, selectedCategory]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size must be less than 2MB');
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setImagePreview(base64String);
+      setFormData({ ...formData, image: base64String });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setFormData({ ...formData, image: '' });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +147,9 @@ const Inventory = () => {
       price: product.price,
       category: product.category,
       group: product.group,
+      image: product.image || '',
     });
+    setImagePreview(product.image || null);
     setIsDialogOpen(true);
   };
 
@@ -128,6 +162,7 @@ const Inventory = () => {
 
   const resetForm = () => {
     setEditingProduct(null);
+    setImagePreview(null);
     setFormData({
       name: '',
       material: '',
@@ -135,6 +170,7 @@ const Inventory = () => {
       price: 0,
       category: CATEGORIES[0],
       group: groups.find(g => g !== 'All') || 'Afterrain',
+      image: '',
     });
   };
 
@@ -161,6 +197,44 @@ const Inventory = () => {
                 <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="image">Product Image</Label>
+                  <div className="mt-2">
+                    {imagePreview ? (
+                      <div className="relative inline-block">
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="w-32 h-32 object-cover rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                          onClick={removeImage}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
+                        <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
+                          <Upload className="h-8 w-8 text-gray-400" />
+                          <span className="text-xs text-gray-500 mt-2">Upload</span>
+                        </label>
+                        <input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">Max size: 2MB</p>
+                  </div>
+                </div>
                 <div>
                   <Label htmlFor="group">Group</Label>
                   <Select
@@ -278,6 +352,7 @@ const Inventory = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Image</TableHead>
                 <TableHead>Group</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Material</TableHead>
@@ -290,6 +365,19 @@ const Inventory = () => {
             <TableBody>
               {filteredProducts.map((product) => (
                 <TableRow key={product.id}>
+                  <TableCell>
+                    {product.image ? (
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded border"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
+                        <Package className="h-6 w-6 text-gray-400" />
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="font-medium">{product.group}</TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.material}</TableCell>

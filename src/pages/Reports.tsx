@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getSales, formatCurrency, deleteSalesByTransaction } from '@/lib/sales';
-import { getGroups } from '@/lib/inventory';
+import { getGroups, getInventory, saveInventory } from '@/lib/inventory';
 import { DollarSign, Package, TrendingUp, Trash2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
@@ -86,9 +86,31 @@ const Reports = () => {
   }, [filteredSales]);
 
   const handleDeleteTransaction = (transactionId: string) => {
-    deleteSalesByTransaction(transactionId);
+    const deletedSales = deleteSalesByTransaction(transactionId);
+    
+    // Restore inventory quantities
+    if (deletedSales.length > 0) {
+      const currentInventory = getInventory();
+      const updatedInventory = currentInventory.map(product => {
+        // Find all deleted sales for this product
+        const restoredItems = deletedSales.filter(sale => sale.itemName === product.name);
+        
+        if (restoredItems.length > 0) {
+          const totalRestored = restoredItems.reduce((sum, sale) => sum + sale.quantitySold, 0);
+          return {
+            ...product,
+            quantity: product.quantity + totalRestored,
+            sold: product.sold - totalRestored,
+          };
+        }
+        return product;
+      });
+      
+      saveInventory(updatedInventory);
+    }
+    
     setSales(getSales());
-    toast.success('Transaction deleted successfully');
+    toast.success('Transaction deleted and inventory restored successfully');
   };
 
   const exportToExcel = () => {

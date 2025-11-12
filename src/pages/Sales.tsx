@@ -265,6 +265,20 @@ const Sales = () => {
                   >
                     <Card className="p-4 transition-shadow hover:shadow-lg overflow-hidden">
                       <div className="space-y-3">
+                        {product.image && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.04 + 0.05 }}
+                            className="w-full h-32 overflow-hidden rounded-lg"
+                          >
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </motion.div>
+                        )}
                         <motion.div
                           initial={{ x: -10, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}

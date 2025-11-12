@@ -28,10 +28,12 @@ export const addSale = (sale: Omit<Sale, 'id' | 'date'>): Sale => {
   return newSale;
 };
 
-export const deleteSalesByTransaction = (transactionId: string) => {
+export const deleteSalesByTransaction = (transactionId: string): Sale[] => {
   const sales = getSales();
+  const deletedSales = sales.filter(s => s.transactionId === transactionId);
   const updated = sales.filter(s => s.transactionId !== transactionId);
   localStorage.setItem('sales', JSON.stringify(updated));
+  return deletedSales;
 };
 
 export const formatCurrency = (amount: number): string => {
