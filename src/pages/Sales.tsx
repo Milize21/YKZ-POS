@@ -524,34 +524,52 @@ const Sales = () => {
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Sale</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl">Confirm Sale</AlertDialogTitle>
             <AlertDialogDescription>
-              <div className="space-y-2 text-left">
-                <p><strong>Customer ID:</strong> {customerDetails}-{customerNumber}</p>
-                <p><strong>Staff:</strong> {staffName}</p>
-                <p><strong>Total Amount:</strong> {formatCurrency(getTotalAmount())}</p>
-                <p><strong>Items:</strong> {cart.size} item(s)</p>
-                <div className="mt-4">
-                  <p className="font-semibold">Cart Items:</p>
-                  <ul className="list-disc list-inside text-sm">
+              <div className="space-y-4 text-left text-base">
+                <div className="grid grid-cols-2 gap-4 bg-muted/50 p-4 rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Customer ID</p>
+                    <p className="font-semibold text-lg text-foreground">{customerDetails}-{customerNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Staff</p>
+                    <p className="font-semibold text-lg text-foreground">{staffName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Items</p>
+                    <p className="font-semibold text-lg text-foreground">{cart.size} item(s)</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Amount</p>
+                    <p className="font-bold text-2xl text-primary">{formatCurrency(getTotalAmount())}</p>
+                  </div>
+                </div>
+                <div className="border-t pt-4">
+                  <p className="font-semibold text-foreground mb-3">Cart Items:</p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
                     {Array.from(cart.entries()).map(([productId, qty]) => {
                       const product = inventory.find(p => p.id === productId);
                       return product ? (
-                        <li key={productId}>
-                          {product.name} x{qty} - {formatCurrency(product.price * qty)}
-                        </li>
+                        <div key={productId} className="flex justify-between items-center bg-background p-3 rounded border">
+                          <div>
+                            <p className="font-medium text-foreground">{product.name}</p>
+                            <p className="text-sm text-muted-foreground">Qty: {qty}</p>
+                          </div>
+                          <p className="font-semibold text-foreground">{formatCurrency(product.price * qty)}</p>
+                        </div>
                       ) : null;
                     })}
-                  </ul>
+                  </div>
                 </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmCheckout} style={{ backgroundColor: '#2D3561' }}>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="text-base">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCheckout} className="text-base" style={{ backgroundColor: '#2D3561' }}>
               Confirm Sale
             </AlertDialogAction>
           </AlertDialogFooter>
