@@ -3,6 +3,7 @@ import { Layout } from '@/components/Layout';
 import { CategoryCard } from '@/components/CategoryCard';
 import { CATEGORIES } from '@/lib/inventory';
 import { motion } from 'framer-motion';
+import { MorphShape } from '@/components/MorphShape';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -34,7 +35,15 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      {/* Decorative Morphing Shapes */}
+      <div className="fixed top-20 right-10 opacity-10 pointer-events-none z-0">
+        <MorphShape variant="blob" color="#2D3561" size={150} duration={10} />
+      </div>
+      <div className="fixed bottom-20 left-10 opacity-10 pointer-events-none z-0">
+        <MorphShape variant="blob" color="#5D6BA3" size={120} duration={12} />
+      </div>
+      
+      <div className="space-y-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

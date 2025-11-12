@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { login } from '@/lib/auth';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -28,6 +29,9 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Particle Background */}
+      <ParticleBackground variant="subtle" />
+      
       {/* Wave Pattern Background */}
       <motion.div 
         className="fixed inset-0 pointer-events-none opacity-5 z-0"

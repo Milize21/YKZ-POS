@@ -18,6 +18,7 @@ import { addSale, formatCurrency, getSales } from '@/lib/sales';
 import QRReceipt from '@/components/QRReceipt';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MorphShape } from '@/components/MorphShape';
 
 const Sales = () => {
   const [searchParams] = useSearchParams();
@@ -196,7 +197,12 @@ const Sales = () => {
 
   return (
     <Layout>
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* Decorative Wave Shape */}
+      <div className="fixed top-1/4 right-0 opacity-5 pointer-events-none z-0">
+        <MorphShape variant="wave" color="#2D3561" size={180} duration={15} />
+      </div>
+      
+      <div className="grid lg:grid-cols-3 gap-6 relative z-10">
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <div>
