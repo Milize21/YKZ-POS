@@ -12,6 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Minus, Plus, ShoppingCart } from 'lucide-react';
 import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
 import { addSale, formatCurrency, getSales } from '@/lib/sales';
@@ -33,6 +43,8 @@ const Sales = () => {
   const [customerDate, setCustomerDate] = useState('');
   const [customerDetails, setCustomerDetails] = useState('');
   const [customerNumber, setCustomerNumber] = useState('');
+  const [staffName, setStaffName] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [qrValue, setQrValue] = useState('');
   const [qrLabel, setQrLabel] = useState('');
@@ -136,6 +148,11 @@ const Sales = () => {
       return;
     }
 
+    if (!staffName.trim()) {
+      toast.error('Please enter staff name');
+      return;
+    }
+
     // Create full customer ID
     const fullCustomerId = `${customerDetails.trim()}-${customerNumber.trim()}`;
 
@@ -148,6 +165,12 @@ const Sales = () => {
       return;
     }
 
+    // Show confirmation dialog
+    setShowConfirmDialog(true);
+  };
+
+  const confirmCheckout = () => {
+    const fullCustomerId = `${customerDetails.trim()}-${customerNumber.trim()}`;
     const transactionId = `TXN-${Date.now()}`;
     // Collect sale records so we can show a QR for the transaction
     const saleRecords = [] as any[];
@@ -163,6 +186,7 @@ const Sales = () => {
           itemName: product.name,
           quantitySold: soldQty,
           totalPrice: product.price * soldQty,
+          staffName: staffName.trim(),
         });
         saleRecords.push(newSale);
 
@@ -180,8 +204,10 @@ const Sales = () => {
     setCart(new Map());
     setCustomerDate('');
     setCustomerDetails('');
-    const totalAmount = getTotalAmount();
     setCustomerNumber('');
+    setStaffName('');
+    const totalAmount = getTotalAmount();
+    setShowConfirmDialog(false);
     // Prepare QR payload (encode transaction info)
     const payload = JSON.stringify({
       transactionId,
@@ -440,14 +466,21 @@ const Sales = () => {
                   id="customerNumber"
                   placeholder="e.g. 001"
                   value={customerNumber}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '');
-                    setCustomerNumber(value.padStart(3, '0').slice(-3));
-                  }}
-                  maxLength={3}
+                  onChange={(e) => setCustomerNumber(e.target.value)}
+                  maxLength={10}
                   required
                 />
                 <p className="text-xs text-muted-foreground mt-1">Will create ID: {customerDetails || 'XX'}-{customerNumber || '000'}</p>
+              </div>
+              <div>
+                <Label htmlFor="staffName">Staff Name *</Label>
+                <Input
+                  id="staffName"
+                  placeholder="Enter staff name"
+                  value={staffName}
+                  onChange={(e) => setStaffName(e.target.value)}
+                  required
+                />
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-foreground">Total:</span>
@@ -486,6 +519,42 @@ const Sales = () => {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Sale</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-2 text-left">
+                <p><strong>Customer ID:</strong> {customerDetails}-{customerNumber}</p>
+                <p><strong>Staff:</strong> {staffName}</p>
+                <p><strong>Total Amount:</strong> {formatCurrency(getTotalAmount())}</p>
+                <p><strong>Items:</strong> {cart.size} item(s)</p>
+                <div className="mt-4">
+                  <p className="font-semibold">Cart Items:</p>
+                  <ul className="list-disc list-inside text-sm">
+                    {Array.from(cart.entries()).map(([productId, qty]) => {
+                      const product = inventory.find(p => p.id === productId);
+                      return product ? (
+                        <li key={productId}>
+                          {product.name} x{qty} - {formatCurrency(product.price * qty)}
+                        </li>
+                      ) : null;
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCheckout} style={{ backgroundColor: '#2D3561' }}>
+              Confirm Sale
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

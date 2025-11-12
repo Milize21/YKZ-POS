@@ -9,6 +9,7 @@ export interface Sale {
   itemName: string;
   quantitySold: number;
   totalPrice: number;
+  staffName: string;
 }
 
 export const getSales = (): Sale[] => {

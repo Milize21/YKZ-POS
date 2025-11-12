@@ -164,11 +164,12 @@ const Reports = () => {
     // Detailed Transactions Sheet
     const transactionData = [
       ['Transaction Details'],
-      ['Transaction ID', 'Date', 'Customer ID', 'Group', 'Category', 'Item Name', 'Quantity', 'Total Price'],
+      ['Transaction ID', 'Date', 'Customer ID', 'Staff Name', 'Group', 'Category', 'Item Name', 'Quantity', 'Total Price'],
       ...filteredSales.map(sale => [
         sale.transactionId,
         new Date(sale.date).toLocaleString(),
         sale.customerId,
+        sale.staffName || 'N/A',
         sale.group,
         sale.category,
         sale.itemName,
@@ -399,6 +400,9 @@ const Reports = () => {
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Customer: {firstSale.customerId} | Group: {firstSale.group}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Staff: {firstSale.staffName || 'N/A'}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {new Date(firstSale.date).toLocaleString()}
