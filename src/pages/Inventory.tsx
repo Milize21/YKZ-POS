@@ -27,14 +27,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, Upload, X, Package } from 'lucide-react';
-import { getInventory, saveInventory, getCategories, addCategory, Product, getGroups, moveToTrash } from '@/lib/inventory';
+import { getInventory, saveInventory, getCategories, addCategory, Product, getGroups, moveToTrash, getInventoryWithImages } from '@/lib/inventory';
 import { formatCurrency } from '@/lib/sales';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Inventory = () => {
-  const [inventory, setInventory] = useState<Product[]>(getInventory());
+  const [inventory, setInventory] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState<string[]>(getGroups());
   const [categories, setCategories] = useState<string[]>(getCategories());
   const [selectedCategory, setSelectedCategory] = useState<string>(getCategories()[0]);
@@ -53,6 +54,26 @@ const Inventory = () => {
     group: groups.find(g => g !== 'All') || 'Afterrain',
     image: '',
   });
+
+  // Load inventory with images from IndexedDB
+  useEffect(() => {
+    const loadInventory = async () => {
+      setLoading(true);
+      try {
+        const products = await getInventoryWithImages();
+        setInventory(products);
+      } catch (error) {
+        console.error('Failed to load inventory:', error);
+        toast.error('Failed to load some product images');
+        // Fallback to localStorage-only data
+        setInventory(getInventory());
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadInventory();
+  }, []);
 
   // Refresh groups and categories from localStorage periodically (optimized)
   useEffect(() => {
@@ -159,37 +180,46 @@ const Inventory = () => {
     setFormData({ ...formData, image: '' });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Disable multiple rapid submissions
     if (isDialogOpen === false) return;
     
-    if (editingProduct) {
-      const updated = inventory.map(p =>
-        p.id === editingProduct.id ? { 
-          ...p, 
+    try {
+      if (editingProduct) {
+        const updated = inventory.map(p =>
+          p.id === editingProduct.id ? { 
+            ...p, 
+            ...formData,
+            sold: p.sold // Preserve sold count
+          } : p
+        );
+        setInventory(updated);
+        await saveInventory(updated);
+        toast.success('Product updated successfully');
+      } else {
+        const newProduct: Product = {
           ...formData,
-          sold: p.sold // Preserve sold count
-        } : p
-      );
-      setInventory(updated);
-      saveInventory(updated);
-      toast.success('Product updated successfully');
-    } else {
-      const newProduct: Product = {
-        ...formData,
-        id: `prod-${Date.now()}`,
-        sold: 0,
-      };
-      const updated = [...inventory, newProduct];
-      setInventory(updated);
-      saveInventory(updated);
-      toast.success('Product added successfully');
+          id: `prod-${Date.now()}`,
+          sold: 0,
+        };
+        const updated = [...inventory, newProduct];
+        setInventory(updated);
+        await saveInventory(updated);
+        toast.success('Product added successfully');
+      }
+      
+      setIsDialogOpen(false);
+      resetForm();
+      
+      // Reload inventory to get IndexedDB references
+      const refreshed = await getInventoryWithImages();
+      setInventory(refreshed);
+    } catch (error) {
+      console.error('Failed to save product:', error);
+      toast.error('Failed to save product. Please try again.');
     }
-    
-    setIsDialogOpen(false);
-    resetForm();
   };
 
   const handleEdit = (product: Product) => {
@@ -207,14 +237,19 @@ const Inventory = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const product = inventory.find(p => p.id === id);
     if (product) {
-      moveToTrash(product);
-      const updated = inventory.filter(p => p.id !== id);
-      setInventory(updated);
-      saveInventory(updated);
-      toast.success('Product moved to trash');
+      try {
+        await moveToTrash(product);
+        const updated = inventory.filter(p => p.id !== id);
+        setInventory(updated);
+        await saveInventory(updated);
+        toast.success('Product moved to trash');
+      } catch (error) {
+        console.error('Failed to move product to trash:', error);
+        toast.error('Failed to move product to trash');
+      }
     }
   };
 

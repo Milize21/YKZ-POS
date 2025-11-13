@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Minus, Plus, ShoppingCart } from 'lucide-react';
-import { getInventory, saveInventory, CATEGORIES, Product, getGroups } from '@/lib/inventory';
+import { getInventory, saveInventory, CATEGORIES, Product, getGroups, getInventoryWithImages } from '@/lib/inventory';
 import { addSale, formatCurrency, getSales } from '@/lib/sales';
 import QRReceipt from '@/components/QRReceipt';
 import { toast } from 'sonner';
@@ -35,7 +35,8 @@ const Sales = () => {
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || CATEGORIES[0];
   
-  const [inventory, setInventory] = useState<Product[]>(getInventory());
+  const [inventory, setInventory] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState<string[]>(getGroups());
   const [selectedGroup, setSelectedGroup] = useState<string>(groups[0] || 'All');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
@@ -49,8 +50,23 @@ const Sales = () => {
   const [qrValue, setQrValue] = useState('');
   const [qrLabel, setQrLabel] = useState('');
 
+  // Load inventory with images
   useEffect(() => {
-    setInventory(getInventory());
+    const loadInventory = async () => {
+      setLoading(true);
+      try {
+        const products = await getInventoryWithImages();
+        setInventory(products);
+      } catch (error) {
+        console.error('Failed to load inventory:', error);
+        toast.error('Failed to load some product images');
+        setInventory(getInventory());
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadInventory();
   }, []);
 
   // Refresh groups from localStorage periodically

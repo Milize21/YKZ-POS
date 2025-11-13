@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Database, Download, Upload, Trash2, Zap, RefreshCw } from 'lucide-react';
+import { Database, Download, Upload, Trash2, Zap, RefreshCw, HardDrive } from 'lucide-react';
 import { 
   getDatabaseStats, 
   exportDatabase, 
@@ -20,6 +20,7 @@ import {
   clearDatabase,
   optimizeDatabase 
 } from '@/lib/database';
+import { migrateLocalStorageImages, getStorageEstimate } from '@/lib/imageStorage';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { ParticleBackground } from '@/components/ParticleBackground';
@@ -27,9 +28,13 @@ import { ParticleBackground } from '@/components/ParticleBackground';
 const DatabaseSettings = () => {
   const [stats, setStats] = useState(getDatabaseStats());
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [storageInfo, setStorageInfo] = useState<any>(null);
 
-  const refreshStats = () => {
+  const refreshStats = async () => {
     setStats(getDatabaseStats());
+    const storage = await getStorageEstimate();
+    setStorageInfo(storage);
     toast.success('Statistics refreshed');
   };
 
@@ -84,6 +89,29 @@ const DatabaseSettings = () => {
     const result = optimizeDatabase();
     toast.success(`Database optimized! Saved ${result.saved}`);
     refreshStats();
+  };
+
+  const handleMigrateImages = async () => {
+    setIsMigrating(true);
+    try {
+      const result = await migrateLocalStorageImages();
+      
+      if (result.errors.length > 0) {
+        toast.error(`Migration completed with ${result.errors.length} errors`);
+        console.error('Migration errors:', result.errors);
+      } else {
+        const freedMB = (result.freedSpace / 1024 / 1024).toFixed(2);
+        toast.success(`✅ Migrated ${result.migratedCount} images, freed ${freedMB}MB from localStorage!`);
+      }
+      
+      await refreshStats();
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+      console.error('Migration failed:', error);
+      toast.error('Migration failed. Please try again.');
+    } finally {
+      setIsMigrating(false);
+    }
   };
 
   return (
@@ -149,7 +177,42 @@ const DatabaseSettings = () => {
               {stats.images.sizeMB} MB ({stats.images.sizeKB} KB)
             </p>
           </Card>
+
+          {storageInfo && (
+            <Card className="p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <HardDrive className="h-6 w-6 text-primary" />
+                <h3 className="font-semibold text-lg">Browser Storage</h3>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{storageInfo.percentUsed}%</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {storageInfo.usageMB} MB / {storageInfo.quotaMB} MB
+              </p>
+            </Card>
+          )}
         </div>
+
+        {/* Storage Migration Card */}
+        <Card className="p-6 border-2 border-primary/20 bg-primary/5">
+          <div className="flex items-start gap-4">
+            <HardDrive className="h-8 w-8 text-primary mt-1" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-2">Fix Storage Quota Issue</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                If you're seeing "Storage quota exceeded" errors, click below to migrate your images from localStorage to IndexedDB. 
+                This will free up space and prevent storage issues. Your data will be preserved.
+              </p>
+              <Button 
+                onClick={handleMigrateImages} 
+                disabled={isMigrating}
+                className="w-full md:w-auto"
+              >
+                <HardDrive className="h-4 w-4 mr-2" />
+                {isMigrating ? 'Migrating Images...' : 'Migrate Images to IndexedDB'}
+              </Button>
+            </div>
+          </div>
+        </Card>
 
         {/* Actions */}
         <Card className="p-6">

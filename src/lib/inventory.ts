@@ -1,5 +1,5 @@
 // Inventory types and data
-import { getCollection, updateCollection, getDatabase } from './database';
+import { getCollection, updateCollection, getDatabase, saveProductWithImage, loadProductWithImage, deleteProductImage } from './database';
 
 export interface Product {
   id: string;
@@ -166,8 +166,40 @@ export const getInventory = (): Product[] => {
   return fixed;
 };
 
-export const saveInventory = (inventory: Product[]) => {
-  updateCollection('inventory', inventory);
+export const saveInventory = async (inventory: Product[]) => {
+  try {
+    // Process products with images
+    const processedInventory = await Promise.all(
+      inventory.map(async (product) => {
+        if (product.image && product.image.startsWith('data:')) {
+          return await saveProductWithImage(product);
+        }
+        return product;
+      })
+    );
+    
+    updateCollection('inventory', processedInventory);
+  } catch (error) {
+    console.error('Error saving inventory:', error);
+    // Fallback: save without processing images
+    updateCollection('inventory', inventory);
+  }
+};
+
+// Load inventory with images from IndexedDB
+export const getInventoryWithImages = async (): Promise<Product[]> => {
+  const inventory = getInventory();
+  
+  try {
+    const productsWithImages = await Promise.all(
+      inventory.map(async (product) => await loadProductWithImage(product))
+    );
+    
+    return productsWithImages;
+  } catch (error) {
+    console.error('Error loading images:', error);
+    return inventory;
+  }
 };
 
 export const getProductsByCategory = (category: string): Product[] => {
@@ -183,13 +215,20 @@ export const saveTrash = (trash: TrashItem[]) => {
   updateCollection('inventoryTrash', trash);
 };
 
-export const moveToTrash = (product: Product): TrashItem[] => {
+export const moveToTrash = async (product: Product): Promise<TrashItem[]> => {
   const trash = getTrash();
   const trashedItem: TrashItem = {
     ...product,
     deletedAt: new Date().toISOString(),
   };
-  trash.push(trashedItem);
+  
+  // Save product with image to trash (if it has an image)
+  let processedItem = trashedItem;
+  if (trashedItem.image && trashedItem.image.startsWith('data:')) {
+    processedItem = await saveProductWithImage(trashedItem) as TrashItem;
+  }
+  
+  trash.push(processedItem);
   saveTrash(trash);
   return trash;
 };
@@ -210,13 +249,24 @@ export const restoreFromTrash = (productId: string): { product: Product | null; 
   return { product, trash };
 };
 
-export const permanentlyDelete = (productId: string): TrashItem[] => {
+export const permanentlyDelete = async (productId: string): Promise<TrashItem[]> => {
   const trash = getTrash();
+  
+  // Delete image from IndexedDB if exists
+  await deleteProductImage(productId);
+  
   const updated = trash.filter(item => item.id !== productId);
   saveTrash(updated);
   return updated;
 };
 
-export const emptyTrash = (): void => {
+export const emptyTrash = async (): Promise<void> => {
+  const trash = getTrash();
+  
+  // Delete all images from IndexedDB
+  await Promise.all(
+    trash.map(item => deleteProductImage(item.id))
+  );
+  
   saveTrash([]);
 };

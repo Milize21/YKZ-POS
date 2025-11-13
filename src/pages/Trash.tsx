@@ -28,7 +28,8 @@ import {
   emptyTrash,
   getInventory,
   saveInventory,
-  TrashItem 
+  TrashItem,
+  getInventoryWithImages
 } from '@/lib/inventory';
 import { formatCurrency } from '@/lib/sales';
 import { toast } from 'sonner';
@@ -49,35 +50,50 @@ const Trash = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleRestore = (productId: string) => {
-    const { product, trash: updatedTrash } = restoreFromTrash(productId);
-    
-    if (product) {
-      const inventory = getInventory();
-      inventory.push(product);
-      saveInventory(inventory);
-      setTrash(updatedTrash);
-      toast.success('Product restored successfully');
-    } else {
+  const handleRestore = async (productId: string) => {
+    try {
+      const { product, trash: updatedTrash } = restoreFromTrash(productId);
+      
+      if (product) {
+        const inventory = await getInventoryWithImages();
+        inventory.push(product);
+        await saveInventory(inventory);
+        setTrash(updatedTrash);
+        toast.success('Product restored successfully');
+      } else {
+        toast.error('Failed to restore product');
+      }
+    } catch (error) {
+      console.error('Failed to restore product:', error);
       toast.error('Failed to restore product');
     }
   };
 
-  const handlePermanentDelete = () => {
+  const handlePermanentDelete = async () => {
     if (selectedItem) {
-      const updatedTrash = permanentlyDelete(selectedItem);
-      setTrash(updatedTrash);
-      toast.success('Product permanently deleted');
-      setShowDeleteDialog(false);
-      setSelectedItem(null);
+      try {
+        const updatedTrash = await permanentlyDelete(selectedItem);
+        setTrash(updatedTrash);
+        toast.success('Product permanently deleted');
+        setShowDeleteDialog(false);
+        setSelectedItem(null);
+      } catch (error) {
+        console.error('Failed to delete product:', error);
+        toast.error('Failed to delete product');
+      }
     }
   };
 
-  const handleEmptyTrash = () => {
-    emptyTrash();
-    setTrash([]);
-    toast.success('Trash emptied successfully');
-    setShowEmptyDialog(false);
+  const handleEmptyTrash = async () => {
+    try {
+      await emptyTrash();
+      setTrash([]);
+      toast.success('Trash emptied successfully');
+      setShowEmptyDialog(false);
+    } catch (error) {
+      console.error('Failed to empty trash:', error);
+      toast.error('Failed to empty trash');
+    }
   };
 
   const formatDate = (isoString: string) => {

@@ -1,5 +1,6 @@
 // Centralized Database Manager for localStorage
 // This ensures all data operations are synchronized and organized
+import { saveImageToDB, getImageFromDB, deleteImageFromDB, compressImage } from './imageStorage';
 
 export interface DatabaseSchema {
   inventory: any[];
@@ -203,6 +204,90 @@ export const importDatabase = (jsonData: string): boolean => {
   } catch (error) {
     console.error('Error importing database:', error);
     return false;
+  }
+};
+
+// Get storage usage estimate
+export const getStorageEstimate = async () => {
+  if ('storage' in navigator && 'estimate' in navigator.storage) {
+    try {
+      const estimate = await navigator.storage.estimate();
+      return {
+        usage: estimate.usage || 0,
+        quota: estimate.quota || 0,
+        usageMB: ((estimate.usage || 0) / (1024 * 1024)).toFixed(2),
+        quotaMB: ((estimate.quota || 0) / (1024 * 1024)).toFixed(2),
+        percentUsed: estimate.quota 
+          ? ((estimate.usage || 0) / estimate.quota * 100).toFixed(2)
+          : '0'
+      };
+    } catch (error) {
+      console.error('Error getting storage estimate:', error);
+    }
+  }
+  
+  return {
+    usage: 0,
+    quota: 0,
+    usageMB: '0',
+    quotaMB: '0',
+    percentUsed: '0'
+  };
+};
+
+// Save product with image handling
+export const saveProductWithImage = async (product: any): Promise<any> => {
+  if (product.image && product.image.startsWith('data:')) {
+    try {
+      // Compress image
+      const compressed = await compressImage(product.image, 600, 0.7);
+      
+      // Save to IndexedDB
+      await saveImageToDB(product.id, compressed);
+      
+      // Return product with image reference instead of data
+      return {
+        ...product,
+        image: `indexed:${product.id}`, // Reference to IndexedDB
+        hasImage: true
+      };
+    } catch (error) {
+      console.error('Error saving image:', error);
+      // Fallback: save without image
+      return { ...product, image: '', hasImage: false };
+    }
+  }
+  
+  return product;
+};
+
+// Load product with image from IndexedDB
+export const loadProductWithImage = async (product: any): Promise<any> => {
+  if (product.image && product.image.startsWith('indexed:')) {
+    try {
+      const imageId = product.image.replace('indexed:', '');
+      const imageData = await getImageFromDB(imageId);
+      
+      return {
+        ...product,
+        image: imageData || '',
+        hasImage: !!imageData
+      };
+    } catch (error) {
+      console.error('Error loading image:', error);
+      return { ...product, image: '', hasImage: false };
+    }
+  }
+  
+  return product;
+};
+
+// Delete product image from IndexedDB
+export const deleteProductImage = async (productId: string): Promise<void> => {
+  try {
+    await deleteImageFromDB(productId);
+  } catch (error) {
+    console.error('Error deleting image:', error);
   }
 };
 
