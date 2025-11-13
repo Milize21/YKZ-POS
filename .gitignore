@@ -10,7 +10,27 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-electron
 *.local
+
+# Database files
+*.db
+*.db-journal
+
+# Uploaded media files
+backend/uploads/
+uploads/
+
+# Large build files
+*.exe
+*.msi
+*.asar
+*.dll
+
+# Environment files
+.env
+.env.local
+.env.production
 
 # Editor directories and files
 .vscode/*
