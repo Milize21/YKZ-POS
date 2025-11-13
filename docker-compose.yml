@@ -1,0 +1,97 @@
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:16-alpine
+    container_name: ykz-pos-db
+    environment:
+      POSTGRES_DB: ykz_pos
+      POSTGRES_USER: ykz_user
+      POSTGRES_PASSWORD: ykz_password_2024
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - ykz-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ykz_user -d ykz_pos"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ykz-pos-backend
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://ykz_user:ykz_password_2024@database:5432/ykz_pos
+      JWT_SECRET: ykz_jwt_secret_key_2024_secure
+      CORS_ORIGIN: http://localhost:8080
+      UPLOAD_DIR: /app/uploads
+      MAX_FILE_SIZE: 629145600
+    ports:
+      - "3001:3001"
+    volumes:
+      - media_storage:/app/uploads
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - ykz-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend React App
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ykz-pos-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - ykz-network
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api
+
+  # Development hot-reload service (optional)
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ykz-pos-frontend-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - ykz-network
+    profiles:
+      - development
+
+volumes:
+  postgres_data:
+    driver: local
+  media_storage:
+    driver: local
+
+networks:
+  ykz-network:
+    driver: bridge

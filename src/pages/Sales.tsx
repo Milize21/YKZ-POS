@@ -22,7 +22,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Minus, Plus, ShoppingCart, QrCode } from 'lucide-react';
 import { getInventory, saveInventory, CATEGORIES, Product, getGroups, getInventoryWithImages } from '@/lib/inventory';
 import { addSale, formatCurrency, getSales } from '@/lib/sales';
 import QRReceipt from '@/components/QRReceipt';
@@ -49,6 +55,7 @@ const Sales = () => {
   const [showQR, setShowQR] = useState(false);
   const [qrValue, setQrValue] = useState('');
   const [qrLabel, setQrLabel] = useState('');
+  const [showQRImage, setShowQRImage] = useState(false);
 
   // Load inventory with images
   useEffect(() => {
@@ -248,25 +255,36 @@ const Sales = () => {
         <MorphShape variant="wave" color="#2D3561" size={180} duration={15} />
       </div>
       
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-foreground mb-2">Sales</h2>
               <p className="text-muted-foreground">Select products to sell</p>
             </div>
-            <div className="w-48">
-              <Label>Group</Label>
-              <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {groups.map(group => (
-                    <SelectItem key={group} value={group}>{group}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-end gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowQRImage(true)}
+                title="Show Payment QR"
+                className="h-10 w-10"
+              >
+                <QrCode className="h-5 w-5" />
+              </Button>
+              <div className="w-48">
+                <Label>Group</Label>
+                <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groups.map(group => (
+                      <SelectItem key={group} value={group}>{group}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -599,6 +617,25 @@ const Sales = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* QR Code Image Dialog */}
+      <Dialog open={showQRImage} onOpenChange={setShowQRImage}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">Payment QR Code</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-6">
+            <img 
+              src="/Qris2YKZ.png" 
+              alt="Payment QR Code" 
+              className="w-full max-w-sm rounded-lg shadow-lg"
+            />
+            <p className="text-sm text-muted-foreground mt-4 text-center">
+              Scan this QR code to make a payment
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

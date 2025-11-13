@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, LayoutDashboard, Package, ShoppingCart, FileText, Users, Trash2, Database } from 'lucide-react';
+import { LogOut, LayoutDashboard, Package, ShoppingCart, FileText, Users, Trash2, Database, Video } from 'lucide-react';
 import { getCurrentUser, logout, isAdmin } from '@/lib/auth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FloatingMusicPlayer } from '@/components/FloatingMusicPlayer';
 
 interface LayoutProps {
   children: ReactNode;
@@ -26,6 +27,7 @@ export const Layout = ({ children }: LayoutProps) => {
     ...(isAdmin(user) ? [
       { path: '/groups', icon: Users, label: 'Groups' },
       { path: '/reports', icon: FileText, label: 'Reports' },
+      { path: '/videos', icon: Video, label: 'Videos' },
       { path: '/trash', icon: Trash2, label: 'Trash' },
       { path: '/database', icon: Database, label: 'Database' }
     ] : []),
@@ -218,6 +220,9 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
         </div>
       </motion.footer>
+
+      {/* Floating Music Player */}
+      <FloatingMusicPlayer />
     </div>
   );
 };
