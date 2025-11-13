@@ -51,11 +51,19 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentTrackIdRef = useRef<string | null>(null);
 
-  // Load videos from localStorage
-  const loadVideos = () => {
-    const saved = localStorage.getItem('musicTracks');
-    if (saved) {
-      const newVideos = JSON.parse(saved);
+  // Load videos from database
+  const loadVideos = async () => {
+    try {
+      const response = await fetch('/api/music-tracks');
+      if (!response.ok) throw new Error('Failed to fetch tracks');
+      
+      const tracks = await response.json();
+      const newVideos = tracks.map((track: any) => ({
+        id: track.id,
+        title: track.title,
+        url: track.url,
+        order: track.order_index || 0,
+      }));
       
       // Find if the current playing track still exists in the new list
       if (currentTrackIdRef.current && videos.length > 0) {
@@ -73,6 +81,8 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
       }
       
       setVideos(newVideos);
+    } catch (error) {
+      console.error('Error loading tracks from database:', error);
     }
   };
 

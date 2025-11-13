@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 5173,
+    hmr: {
+      overlay: true,
+      clientPort: 5173,
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
@@ -39,6 +43,11 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    exclude: [],
   },
   build: {
     outDir: 'dist',

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,18 @@ const Groups = () => {
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
   const [editGroupName, setEditGroupName] = useState('');
   const [deletingGroup, setDeletingGroup] = useState<string | null>(null);
+
+  // Refresh groups from localStorage periodically for synchronization
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const updatedGroups = getGroups();
+      if (JSON.stringify(updatedGroups) !== JSON.stringify(groups)) {
+        setGroups(updatedGroups);
+      }
+    }, 1000); // Check every second
+    
+    return () => clearInterval(interval);
+  }, [groups]);
 
   const handleAddGroup = (e: React.FormEvent) => {
     e.preventDefault();

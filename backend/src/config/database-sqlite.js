@@ -100,6 +100,19 @@ const initializeDatabase = () => {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
 
+      -- Music tracks table
+      CREATE TABLE IF NOT EXISTS music_tracks (
+          id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+          title TEXT NOT NULL,
+          url TEXT NOT NULL,
+          order_index INTEGER NOT NULL DEFAULT 0,
+          duration INTEGER,
+          file_size INTEGER,
+          mime_type TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+
       -- Create indexes
       CREATE INDEX IF NOT EXISTS idx_products_group_id ON products(group_id);
       CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
@@ -111,6 +124,7 @@ const initializeDatabase = () => {
       CREATE INDEX IF NOT EXISTS idx_sales_items_product_id ON sales_items(product_id);
       CREATE INDEX IF NOT EXISTS idx_inventory_movements_product_id ON inventory_movements(product_id);
       CREATE INDEX IF NOT EXISTS idx_inventory_movements_created_at ON inventory_movements(created_at);
+      CREATE INDEX IF NOT EXISTS idx_music_tracks_order_index ON music_tracks(order_index);
     `;
 
     db.exec(schema, (err) => {

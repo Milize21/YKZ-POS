@@ -137,21 +137,33 @@ export default function VideoManagement() {
     loadVideos();
   }, []);
 
-  const loadVideos = () => {
-    // Load from localStorage for now
-    const savedVideos = localStorage.getItem('musicTracks');
-    if (savedVideos) {
-      setVideos(JSON.parse(savedVideos));
+  const loadVideos = async () => {
+    try {
+      const response = await fetch('/api/music-tracks');
+      if (!response.ok) throw new Error('Failed to fetch tracks');
+      
+      const tracks = await response.json();
+      // Map database format to video format
+      const formattedTracks = tracks.map((track: any) => ({
+        id: track.id,
+        title: track.title,
+        url: track.url,
+        order: track.order_index || 0,
+      }));
+      setVideos(formattedTracks);
+    } catch (error) {
+      console.error('Error loading tracks:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load audio tracks",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const saveVideos = (updatedVideos: Video[]) => {
-    localStorage.setItem('musicTracks', JSON.stringify(updatedVideos));
-    setVideos(updatedVideos);
-  };
-
-  const handleAddVideo = () => {
+  const handleAddVideo = async () => {
     if (!newVideo.title || !newVideo.url) {
       toast({
         title: "Error",
@@ -170,29 +182,43 @@ export default function VideoManagement() {
       return;
     }
 
-    const video: Video = {
-      id: Date.now().toString(),
-      title: newVideo.title,
-      url: newVideo.url,
-      order: videos.length,
-    };
+    try {
+      const response = await fetch('/api/music-tracks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newVideo.title,
+          url: newVideo.url,
+          order_index: videos.length,
+        }),
+      });
 
-    saveVideos([...videos, video]);
-    
-    // Reload the audio player
-    audioPlayer.loadVideos();
-    
-    // Reset form and close dialog
-    setNewVideo({ title: '', url: '', order: 0 });
-    setDialogOpen(false);
-    
-    toast({
-      title: "Success",
-      description: "Audio track added successfully",
-    });
+      if (!response.ok) throw new Error('Failed to add track');
+
+      await loadVideos();
+      
+      // Reload the audio player
+      audioPlayer.loadVideos();
+      
+      // Reset form and close dialog
+      setNewVideo({ title: '', url: '', order: 0 });
+      setDialogOpen(false);
+      
+      toast({
+        title: "Success",
+        description: "Audio track added successfully",
+      });
+    } catch (error) {
+      console.error('Error adding track:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add audio track",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleUpdateVideo = () => {
+  const handleUpdateVideo = async () => {
     if (!editingVideo || !editingVideo.title || !editingVideo.url) {
       toast({
         title: "Error",
@@ -202,41 +228,69 @@ export default function VideoManagement() {
       return;
     }
 
-    const updatedVideos = videos.map(v => 
-      v.id === editingVideo.id ? editingVideo : v
-    );
+    try {
+      const response = await fetch(`/api/music-tracks/${editingVideo.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editingVideo.title,
+          url: editingVideo.url,
+          order_index: editingVideo.order,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update track');
+
+      await loadVideos();
+      
+      // Reload the audio player
+      audioPlayer.loadVideos();
+      
+      setEditingVideo(null);
+      setDialogOpen(false);
     
-    saveVideos(updatedVideos);
-    
-    // Reload the audio player
-    audioPlayer.loadVideos();
-    
-    setEditingVideo(null);
-    setDialogOpen(false);
-    
-    toast({
-      title: "Success",
-      description: "Audio track updated successfully",
-    });
+      toast({
+        title: "Success",
+        description: "Audio track updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating track:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update audio track",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteVideo = (id: string) => {
-    const updatedVideos = videos
-      .filter(v => v.id !== id)
-      .map((v, index) => ({ ...v, order: index }));
-    
-    saveVideos(updatedVideos);
-    
-    // Reload the audio player
-    audioPlayer.loadVideos();
-    
-    toast({
-      title: "Success",
-      description: "Audio track deleted successfully",
-    });
+  const handleDeleteVideo = async (id: string) => {
+    try {
+      const response = await fetch(`/api/music-tracks/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete track');
+
+      await loadVideos();
+      
+      // Reload the audio player
+      audioPlayer.loadVideos();
+      
+      toast({
+        title: "Success",
+        description: "Audio track deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting track:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete audio track",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -246,13 +300,39 @@ export default function VideoManagement() {
       const reorderedVideos = arrayMove(videos, oldIndex, newIndex)
         .map((v, index) => ({ ...v, order: index }));
 
-      saveVideos(reorderedVideos);
-      audioPlayer.loadVideos();
+      setVideos(reorderedVideos);
 
-      toast({
-        title: "Reordered",
-        description: "Track order updated successfully",
-      });
+      try {
+        // Update order in database
+        const tracksToUpdate = reorderedVideos.map((v) => ({
+          id: v.id,
+          order_index: v.order,
+        }));
+
+        const response = await fetch('/api/music-tracks/reorder/bulk', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tracks: tracksToUpdate }),
+        });
+
+        if (!response.ok) throw new Error('Failed to reorder tracks');
+
+        audioPlayer.loadVideos();
+
+        toast({
+          title: "Reordered",
+          description: "Track order updated successfully",
+        });
+      } catch (error) {
+        console.error('Error reordering tracks:', error);
+        // Reload on error to restore correct order
+        await loadVideos();
+        toast({
+          title: "Error",
+          description: "Failed to update track order",
+          variant: "destructive",
+        });
+      }
     }
   };
 

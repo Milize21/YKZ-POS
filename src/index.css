@@ -115,3 +115,73 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide scrollbar for carousel */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Thin scrollbar for category buttons */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+/* Smooth scroll behavior */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Category carousel grid layout - show max 6 items */
+#category-carousel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(120px, 180px);
+  gap: 0.75rem;
+}
+
+/* Scrollbar styling for category carousel */
+#category-carousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+#category-carousel::-webkit-scrollbar-track {
+  background: rgba(229, 231, 235, 0.3);
+  border-radius: 10px;
+  margin: 0 8px;
+}
+
+#category-carousel::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.6);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+#category-carousel::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.8);
+}
+
+#category-carousel::-webkit-scrollbar-thumb:active {
+  background: rgba(37, 99, 235, 1);
+}

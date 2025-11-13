@@ -1,12 +1,32 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { CategoryCard } from '@/components/CategoryCard';
-import { CATEGORIES } from '@/lib/inventory';
+import { getCategories } from '@/lib/inventory';
 import { motion } from 'framer-motion';
 import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState<string[]>(() => {
+    const cats = getCategories();
+    // Remove duplicates using Set
+    return Array.from(new Set(cats));
+  });
+
+  // Refresh categories from localStorage
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const updatedCategories = getCategories();
+      // Remove duplicates
+      const uniqueCategories = Array.from(new Set(updatedCategories));
+      if (JSON.stringify(uniqueCategories) !== JSON.stringify(categories)) {
+        setCategories(uniqueCategories);
+      }
+    }, 1000); // Check every second for category updates
+    
+    return () => clearInterval(interval);
+  }, [categories]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -54,8 +74,8 @@ const Dashboard = () => {
           initial="hidden"
           animate="visible"
         >
-          {CATEGORIES.map((category) => (
-            <motion.div key={category} variants={itemVariants}>
+          {categories.map((category, index) => (
+            <motion.div key={`${category}-${index}`} variants={itemVariants}>
               <CategoryCard
                 category={category}
                 onClick={() => navigate(`/sales?category=${encodeURIComponent(category)}`)}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,24 @@ const Reports = () => {
   const [customerIdFilter, setCustomerIdFilter] = useState('');
   const [groupFilter, setGroupFilter] = useState('All');
   const [sales, setSales] = useState(getSales());
-  const groups = getGroups();
+  const [groups, setGroups] = useState<string[]>(getGroups());
+
+  // Refresh groups and sales from localStorage periodically for synchronization
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const updatedGroups = getGroups();
+      const updatedSales = getSales();
+      
+      if (JSON.stringify(updatedGroups) !== JSON.stringify(groups)) {
+        setGroups(updatedGroups);
+      }
+      if (JSON.stringify(updatedSales) !== JSON.stringify(sales)) {
+        setSales(updatedSales);
+      }
+    }, 1000); // Check every second
+    
+    return () => clearInterval(interval);
+  }, [groups, sales]);
 
   const filteredSales = useMemo(() => {
     return sales.filter(sale => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -29,8 +29,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Minus, Plus, ShoppingCart, QrCode } from 'lucide-react';
-import { getInventory, saveInventory, CATEGORIES, Product, getGroups, getInventoryWithImages } from '@/lib/inventory';
+import { getInventory, saveInventory, getCategories, Product, getGroups, getInventoryWithImages } from '@/lib/inventory';
 import { addSale, formatCurrency, getSales } from '@/lib/sales';
+import { getNextCustomerNumber } from '@/lib/customers';
 import QRReceipt from '@/components/QRReceipt';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,7 +40,8 @@ import { ParticleBackground } from '@/components/ParticleBackground';
 
 const Sales = () => {
   const [searchParams] = useSearchParams();
-  const initialCategory = searchParams.get('category') || CATEGORIES[0];
+  const [categories, setCategories] = useState<string[]>(getCategories());
+  const initialCategory = searchParams.get('category') || categories[0];
   
   const [inventory, setInventory] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,18 @@ const Sales = () => {
   const [qrValue, setQrValue] = useState('');
   const [qrLabel, setQrLabel] = useState('');
   const [showQRImage, setShowQRImage] = useState(false);
+
+  // Auto-fill customer number on mount and after each sale
+  useEffect(() => {
+    try {
+      const nextNumber = getNextCustomerNumber();
+      setCustomerNumber(nextNumber);
+    } catch (error) {
+      console.error('Error getting next customer number:', error);
+      setCustomerNumber('001'); // Fallback to 001
+      toast.error('Error generating customer number. Starting from 001.');
+    }
+  }, []);
 
   // Load inventory with images
   useEffect(() => {
@@ -76,16 +90,21 @@ const Sales = () => {
     loadInventory();
   }, []);
 
-  // Refresh groups from localStorage periodically
+  // Refresh groups and categories from localStorage periodically
   useEffect(() => {
     const interval = setInterval(() => {
       const updatedGroups = getGroups();
+      const updatedCategories = getCategories();
+      
       if (JSON.stringify(updatedGroups) !== JSON.stringify(groups)) {
         setGroups(updatedGroups);
       }
+      if (JSON.stringify(updatedCategories) !== JSON.stringify(categories)) {
+        setCategories(updatedCategories);
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [groups]);
+  }, [groups, categories]);
 
   const filteredProducts = inventory.filter(p => {
     const matchesCategory = p.category === selectedCategory;
@@ -93,14 +112,16 @@ const Sales = () => {
     return matchesCategory && matchesGroup;
   });
 
-  // Get only categories that have products for the selected group
-  const availableCategories = CATEGORIES.filter(category => {
-    return inventory.some(p => {
-      const matchesCategory = p.category === category;
-      const matchesGroup = selectedGroup === 'All' || p.group === selectedGroup;
-      return matchesCategory && matchesGroup;
+  // Get only categories that have products for the selected group (memoized)
+  const availableCategories = useMemo(() => {
+    return categories.filter(category => {
+      return inventory.some(p => {
+        const matchesCategory = p.category === category;
+        const matchesGroup = selectedGroup === 'All' || p.group === selectedGroup;
+        return matchesCategory && matchesGroup;
+      });
     });
-  });
+  }, [categories, inventory, selectedGroup]);
 
   // If selected category has no products, switch to first available category
   useEffect(() => {
@@ -227,7 +248,16 @@ const Sales = () => {
     setCart(new Map());
     setCustomerDate(new Date().toISOString().split('T')[0]);
     setCustomerDetails('');
-    setCustomerNumber('');
+    
+    // Auto-generate next customer number
+    try {
+      const nextNumber = getNextCustomerNumber();
+      setCustomerNumber(nextNumber);
+    } catch (error) {
+      console.error('Error getting next customer number:', error);
+      toast.error('Maximum customer limit reached or error occurred');
+    }
+    
     setStaffName('');
     const totalAmount = getTotalAmount();
     setShowConfirmDialog(false);
@@ -385,8 +415,8 @@ const Sales = () => {
                             <motion.span 
                               className="w-8 text-center font-medium"
                               key={inCart}
-                              initial={{ scale: 1.5, color: '#2D3561' }}
-                              animate={{ scale: 1, color: 'inherit' }}
+                              initial={{ scale: 1.5 }}
+                              animate={{ scale: 1 }}
                               transition={{ type: "spring" as const, stiffness: 400, damping: 20 }}
                             >
                               {inCart}
@@ -454,8 +484,8 @@ const Sales = () => {
                         </div>
                         <motion.p
                           key={`${productId}-${qty}`}
-                          initial={{ scale: 1.3, color: '#2D3561' }}
-                          animate={{ scale: 1, color: 'inherit' }}
+                          initial={{ scale: 1.3 }}
+                          animate={{ scale: 1 }}
                           className="font-semibold text-foreground"
                         >
                           {formatCurrency(product.price * qty)}
@@ -504,13 +534,14 @@ const Sales = () => {
                 <Label htmlFor="customerNumber">Customer Number *</Label>
                 <Input
                   id="customerNumber"
-                  placeholder="e.g. 001"
                   value={customerNumber}
-                  onChange={(e) => setCustomerNumber(e.target.value)}
-                  maxLength={10}
-                  required
+                  readOnly
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Will create ID: {customerDetails || 'XX'}-{customerNumber || '000'}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Auto-filled • Will create ID: {customerDetails || 'XX'}-{customerNumber || '000'}
+                </p>
               </div>
               <div>
                 <Label htmlFor="staffName">Staff Name *</Label>
@@ -526,10 +557,11 @@ const Sales = () => {
                 <span className="text-lg font-semibold text-foreground">Total:</span>
                 <motion.span
                   key={getTotalAmount()}
-                  initial={{ scale: 1.2, color: '#2D3561' }}
-                  animate={{ scale: 1, color: '#5D6BA3' }}
+                  initial={{ scale: 1.2 }}
+                  animate={{ scale: 1 }}
                   transition={{ type: "spring" as const, stiffness: 300, damping: 20 }}
                   className="text-2xl font-bold"
+                  style={{ color: '#5D6BA3' }}
                 >
                   {formatCurrency(getTotalAmount())}
                 </motion.span>

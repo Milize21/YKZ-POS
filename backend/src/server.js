@@ -40,6 +40,7 @@ const salesRoutes = require('./routes/sales');
 const inventoryRoutes = require('./routes/inventory');
 const reportsRoutes = require('./routes/reports');
 const mediaRoutes = require('./routes/media');
+const musicTracksRoutes = require('./routes/music-tracks');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -102,6 +103,7 @@ app.use('/api/sales', salesRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/media', uploadLimiter, mediaRoutes); // Limit uploads
+app.use('/api/music-tracks', musicTracksRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

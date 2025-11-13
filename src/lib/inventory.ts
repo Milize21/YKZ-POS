@@ -41,11 +41,15 @@ export const saveGroups = (groups: string[]) => {
 };
 
 export const getCategories = (): string[] => {
-  return getCollection('categories');
+  const categories = getCollection('categories');
+  // Always return deduplicated categories
+  return Array.from(new Set(categories));
 };
 
 export const saveCategories = (categories: string[]) => {
-  updateCollection('categories', categories);
+  // Remove duplicates before saving
+  const uniqueCategories = Array.from(new Set(categories));
+  updateCollection('categories', uniqueCategories);
 };
 
 export const addCategory = (category: string): string[] => {
