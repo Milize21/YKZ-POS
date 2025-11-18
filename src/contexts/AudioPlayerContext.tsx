@@ -100,33 +100,48 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     const handleLoadedMetadata = () => setDuration(audio.duration);
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => {
-      if (isLooping) {
-        if (currentIndex < videos.length - 1) {
-          setCurrentIndex(currentIndex + 1);
-        } else {
-          setCurrentIndex(0);
-        }
-      } else {
-        setIsPlaying(false);
-      }
-    };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleEnded);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleEnded);
       audio.pause();
     };
   }, []);
+
+  // Handle track end - move to next track
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => {
+      // Always continue to next track if available
+      if (currentIndex < videos.length - 1) {
+        // Move to next track and keep playing
+        setCurrentIndex(currentIndex + 1);
+        setIsPlaying(true); // Ensure playing state is maintained
+      } else if (isLooping) {
+        // Loop back to first track if looping is enabled
+        setCurrentIndex(0);
+        setIsPlaying(true); // Ensure playing state is maintained
+      } else {
+        // Stop playback only if we're at the end and looping is disabled
+        setIsPlaying(false);
+      }
+    };
+
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [currentIndex, videos.length, isLooping]);
 
   // Load new track when index changes
   useEffect(() => {
@@ -139,14 +154,25 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
       if (currentTrackIdRef.current !== currentTrack.id) {
         currentTrackIdRef.current = currentTrack.id;
         audioRef.current.src = fullUrl;
-        audioRef.current.load();
         
-        if (isPlaying) {
-          audioRef.current.play().catch(console.error);
-        }
+        // Wait for audio to be ready, then play if needed
+        const handleCanPlay = () => {
+          if (isPlaying && audioRef.current) {
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(error => {
+                console.error('Error playing audio:', error);
+                setIsPlaying(false);
+              });
+            }
+          }
+        };
+        
+        audioRef.current.addEventListener('canplay', handleCanPlay, { once: true });
+        audioRef.current.load();
       }
     }
-  }, [currentIndex, videos]);
+  }, [currentIndex, videos, isPlaying]);
 
   // Update volume
   useEffect(() => {
@@ -157,7 +183,17 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   const play = () => {
     if (audioRef.current && videos.length > 0) {
-      audioRef.current.play().catch(console.error);
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch(error => {
+            console.error('Error playing audio:', error);
+            setIsPlaying(false);
+          });
+      }
     }
   };
 

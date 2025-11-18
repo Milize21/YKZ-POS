@@ -32,6 +32,7 @@ import { Minus, Plus, ShoppingCart, QrCode } from 'lucide-react';
 import { getInventory, saveInventory, getCategories, Product, getGroups, getInventoryWithImages } from '@/lib/inventory';
 import { addSale, formatCurrency, getSales } from '@/lib/sales';
 import { getNextCustomerNumber } from '@/lib/customers';
+import { notifySuccessfulSale, notifyCancelledSale } from '@/lib/emailNotification';
 import QRReceipt from '@/components/QRReceipt';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -216,8 +217,12 @@ const Sales = () => {
   const confirmCheckout = () => {
     const fullCustomerId = `${customerDetails.trim()}-${customerNumber.trim()}`;
     const transactionId = `TXN-${Date.now()}`;
+    const totalAmount = getTotalAmount();
+    
     // Collect sale records so we can show a QR for the transaction
     const saleRecords = [] as any[];
+    const items = [] as any[];
+    
     const updatedInventory = inventory.map(product => {
       const soldQty = cart.get(product.id);
       if (soldQty) {
@@ -233,6 +238,16 @@ const Sales = () => {
           staffName: staffName.trim(),
         });
         saleRecords.push(newSale);
+        
+        // Collect items for email
+        items.push({
+          name: product.name,
+          quantity: soldQty,
+          price: product.price,
+          subtotal: product.price * soldQty,
+          category: product.category,
+          group: product.group,
+        });
 
         return {
           ...product,
@@ -242,6 +257,23 @@ const Sales = () => {
       }
       return product;
     });
+
+    // Send email notification for successful sale
+    try {
+      notifySuccessfulSale({
+        id: transactionId,
+        customerNumber: fullCustomerId,
+        cashierName: staffName.trim(),
+        items: items,
+        total: totalAmount,
+        paymentMethod: 'Cash', // You can add payment method selection later
+        date: new Date().toISOString(),
+      });
+      console.log('📧 Sale email notification queued');
+    } catch (error) {
+      console.error('Failed to queue email notification:', error);
+      // Don't block the sale if email fails
+    }
 
     setInventory(updatedInventory);
     saveInventory(updatedInventory);
@@ -259,7 +291,6 @@ const Sales = () => {
     }
     
     setStaffName('');
-    const totalAmount = getTotalAmount();
     setShowConfirmDialog(false);
     // Prepare QR payload (encode transaction info)
     const payload = JSON.stringify({
@@ -272,7 +303,7 @@ const Sales = () => {
     setQrValue(payload);
     setQrLabel(`Transaction ${transactionId} — ${formatCurrency(totalAmount)}`);
     setShowQR(true);
-    toast.success(`Sale completed! Transaction ID: ${transactionId}\nCustomer ID: ${fullCustomerId}`);
+    toast.success(`Sale completed! Transaction ID: ${transactionId}\nCustomer ID: ${fullCustomerId}\n📧 Email notification queued`);
   };
 
   return (
@@ -642,7 +673,38 @@ const Sales = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="text-base">Cancel</AlertDialogCancel>
+            <AlertDialogCancel 
+              className="text-base"
+              onClick={() => {
+                // Send cancelled transaction notification
+                const items = Array.from(cart.entries()).map(([productId, qty]) => {
+                  const product = inventory.find(p => p.id === productId);
+                  return product ? {
+                    name: product.name,
+                    quantity: qty,
+                    price: product.price,
+                    subtotal: product.price * qty,
+                  } : null;
+                }).filter(Boolean);
+                
+                try {
+                  notifyCancelledSale({
+                    id: `CANCELLED-${Date.now()}`,
+                    customerNumber: `${customerDetails}-${customerNumber}`,
+                    cashierName: staffName.trim() || 'Unknown',
+                    items: items,
+                    total: getTotalAmount(),
+                    reason: 'Cancelled by user',
+                    date: new Date().toISOString(),
+                  });
+                  console.log('📧 Cancellation email notification queued');
+                } catch (error) {
+                  console.error('Failed to queue cancellation email:', error);
+                }
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction onClick={confirmCheckout} className="text-base" style={{ backgroundColor: '#2D3561' }}>
               Confirm Sale
             </AlertDialogAction>

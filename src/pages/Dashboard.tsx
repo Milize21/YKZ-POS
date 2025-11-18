@@ -5,6 +5,7 @@ import { CategoryCard } from '@/components/CategoryCard';
 import { getCategories } from '@/lib/inventory';
 import { motion } from 'framer-motion';
 import { ParticleBackground } from '@/components/ParticleBackground';
+import { EmailQueueStatus } from '@/components/EmailQueueStatus';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -67,6 +68,9 @@ const Dashboard = () => {
           <h2 className="text-3xl font-bold text-foreground mb-2">Dashboard</h2>
           <p className="text-muted-foreground">Select a category to view products</p>
         </motion.div>
+
+        {/* Email Queue Status */}
+        <EmailQueueStatus />
 
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"

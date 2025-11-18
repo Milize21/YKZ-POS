@@ -41,6 +41,7 @@ const inventoryRoutes = require('./routes/inventory');
 const reportsRoutes = require('./routes/reports');
 const mediaRoutes = require('./routes/media');
 const musicTracksRoutes = require('./routes/music-tracks');
+const emailRoutes = require('./routes/email');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -104,6 +105,7 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/media', uploadLimiter, mediaRoutes); // Limit uploads
 app.use('/api/music-tracks', musicTracksRoutes);
+app.use('/api', emailRoutes); // Email notification routes
 
 // Error handling middleware
 app.use((err, req, res, next) => {
